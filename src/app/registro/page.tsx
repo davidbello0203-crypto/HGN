@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
@@ -21,8 +21,7 @@ const inputStyle: React.CSSProperties = {
   transition: 'border-color 0.3s ease',
 };
 
-export default function RegistroPage() {
-  const router = useRouter();
+function RegistroForm() {
   const params = useSearchParams();
   const [form, setForm] = useState({ nombre: '', apellido: '', email: '', telefono: '', password: '', confirm: '' });
 
@@ -30,6 +29,7 @@ export default function RegistroPage() {
     const emailParam = params.get('email');
     if (emailParam) setForm((prev) => ({ ...prev, email: emailParam }));
   }, [params]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -83,7 +83,6 @@ export default function RegistroPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: EXPO_OUT }}
           style={{ textAlign: 'center', maxWidth: '440px', width: '100%', position: 'relative', zIndex: 1 }}>
 
-          {/* Logo */}
           <div style={{ marginBottom: '40px' }}>
             <a href="/" style={{ display: 'inline-block' }}>
               <Image src="/logo-gnh.png" alt="Good Nutrition Habits" width={140} height={56} style={{ objectFit: 'contain', height: '48px', width: 'auto' }} />
@@ -91,7 +90,6 @@ export default function RegistroPage() {
           </div>
 
           <div style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '40px 32px' }}>
-            {/* Icono sobre */}
             <motion.div
               initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.25, duration: 0.5, ease: EXPO_OUT }}
@@ -112,7 +110,6 @@ export default function RegistroPage() {
               {' '}Ábrelo y haz clic en el enlace para activar tu cuenta.
             </p>
 
-            {/* Pasos */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', marginBottom: '32px' }}>
               {[
                 ['1', 'Abre tu bandeja de entrada'],
@@ -276,5 +273,13 @@ export default function RegistroPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function RegistroPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegistroForm />
+    </Suspense>
   );
 }

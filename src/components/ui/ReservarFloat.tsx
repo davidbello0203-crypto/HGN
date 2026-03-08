@@ -120,16 +120,20 @@ export default function ReservarFloat() {
     setTimeout(() => setStep(nextStep), 320);
   };
 
-  const selectDay = (value: string) => setForm((prev) => ({ ...prev, dia: value }));
+  const selectDay = (value: string) => {
+    setForm((prev) => {
+      const updated = { ...prev, dia: value };
+      if (updated.horario !== '') setTimeout(() => setStep(2), 320);
+      return updated;
+    });
+  };
 
   const selectHorario = (value: string) => {
-    setForm((prev) => ({ ...prev, horario: value }));
-    setTimeout(() => {
-      setForm((prev) => {
-        if (prev.dia !== '') setTimeout(() => setStep(2), 0);
-        return prev;
-      });
-    }, 320);
+    setForm((prev) => {
+      const updated = { ...prev, horario: value };
+      if (updated.dia !== '') setTimeout(() => setStep(2), 320);
+      return updated;
+    });
   };
 
   const handleSubmit = async () => {
