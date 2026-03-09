@@ -14,39 +14,21 @@ export default function CustomCursor() {
     x.set(e.clientX);
     y.set(e.clientY);
     if (!isVisible) setIsVisible(true);
+    // Detectar hover via target — sin listeners por elemento
+    const target = e.target as HTMLElement;
+    setIsHovering(!!target.closest('a, button, [role="button"]'));
   }, [x, y, isVisible]);
 
-  const handleEnter = useCallback(() => setIsHovering(true), []);
-  const handleLeave = useCallback(() => setIsHovering(false), []);
   const handleLeaveWindow = useCallback(() => setIsVisible(false), []);
 
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
     document.documentElement.addEventListener('mouseleave', handleLeaveWindow);
-
-    const attach = () => {
-      const els = document.querySelectorAll<HTMLElement>('a, button, [role="button"]');
-      els.forEach((el) => {
-        el.addEventListener('mouseenter', handleEnter);
-        el.addEventListener('mouseleave', handleLeave);
-      });
-      return els;
-    };
-
-    const els = attach();
-    const obs = new MutationObserver(() => attach());
-    obs.observe(document.body, { childList: true, subtree: true });
-
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       document.documentElement.removeEventListener('mouseleave', handleLeaveWindow);
-      els.forEach((el) => {
-        el.removeEventListener('mouseenter', handleEnter);
-        el.removeEventListener('mouseleave', handleLeave);
-      });
-      obs.disconnect();
     };
-  }, [handleMouseMove, handleEnter, handleLeave, handleLeaveWindow]);
+  }, [handleMouseMove, handleLeaveWindow]);
 
   return (
     <div className="custom-cursor" aria-hidden="true">

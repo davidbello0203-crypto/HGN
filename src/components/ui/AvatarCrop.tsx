@@ -44,6 +44,8 @@ export default function AvatarCrop({ imageSrc, onConfirm, onCancel }: Props) {
       const blob = await getCroppedBlob(imageSrc, croppedArea);
       onConfirm(blob);
     } catch {
+      // no-op: onCancel puede ser llamado por el usuario
+    } finally {
       setProcessing(false);
     }
   };

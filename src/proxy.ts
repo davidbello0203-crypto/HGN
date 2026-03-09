@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest) {
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
     if (profile?.role !== 'admin') {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }

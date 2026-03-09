@@ -59,17 +59,17 @@ export default function Navbar() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (user) {
-        setUserEmail(user.email ?? null);
-        const { data } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        setUserEmail(session.user.email ?? null);
+        const { data } = await supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
         setUserRole(data?.role ?? 'user');
       }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_e, session) => {
       setUserEmail(session?.user?.email ?? null);
       if (session?.user) {
-        const { data } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+        const { data } = await supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
         setUserRole(data?.role ?? 'user');
       } else {
         setUserRole(null);

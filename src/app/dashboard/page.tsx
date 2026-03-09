@@ -140,7 +140,7 @@ export default function DashboardPage() {
     setSavingProfile(true);
     const supabase = createClient();
     await supabase.from('profiles').update(profileForm).eq('id', userId);
-    setProfile((prev) => ({ ...profileForm, avatar_url: prev?.avatar_url }));
+    setProfile((prev) => prev ? { ...profileForm, avatar_url: prev.avatar_url } : profileForm);
     setEditingProfile(false);
     setSavingProfile(false);
   };
