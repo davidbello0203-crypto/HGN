@@ -105,6 +105,7 @@ export default function ReservarFloat() {
   const [form, setForm] = useState<FormData>(EMPTY);
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     const handler = () => {
@@ -148,22 +149,37 @@ export default function ReservarFloat() {
   const handleSubmit = async () => {
     if (!form.objetivo || submitting) return;
     setSubmitting(true);
-    await fetch('/api/reservas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        servicio: form.servicio,
-        dia: form.dia,
-        horario: form.horario,
-        objetivo: form.objetivo,
-        notas: form.notas,
-      }),
-    });
-    setDone(true);
+    setSubmitError('');
+    try {
+      const res = await fetch('/api/reservas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          servicio: form.servicio,
+          dia: form.dia,
+          horario: form.horario,
+          objetivo: form.objetivo,
+          notas: form.notas,
+        }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        if (res.status === 401) {
+          window.location.href = '/login?from=reservar';
+          return;
+        }
+        setSubmitError(json.error || 'Error al guardar la reserva. Intenta de nuevo.');
+        setSubmitting(false);
+        return;
+      }
+      setDone(true);
+    } catch {
+      setSubmitError('Sin conexión. Revisa tu internet e intenta de nuevo.');
+    }
     setSubmitting(false);
   };
 
-  const reset = () => { setStep(0); setForm(EMPTY); setDone(false); setOpen(false); };
+  const reset = () => { setStep(0); setForm(EMPTY); setDone(false); setOpen(false); setSubmitError(''); };
   const canFinish = form.objetivo !== '' && !submitting;
   const firstName = form.nombre.split(' ')[0];
 
@@ -358,7 +374,13 @@ export default function ReservarFloat() {
 
                 {/* Footer */}
                 {!done && (
-                  <div className="reservar-footer" style={{ padding: '20px 32px 28px', borderTop: '1px solid #1A2418', display: 'flex', gap: '12px', flexShrink: 0 }}>
+                  <div className="reservar-footer" style={{ borderTop: '1px solid #1A2418', flexShrink: 0 }}>
+                  {submitError && (
+                    <div style={{ padding: '12px 32px 0', fontFamily: 'var(--font-inter)', fontSize: '12px', color: '#FF6B6B' }}>
+                      {submitError}
+                    </div>
+                  )}
+                  <div style={{ padding: '20px 32px 28px', display: 'flex', gap: '12px' }}>
                     {step > 0 && (
                       <button onClick={() => setStep(step - 1)} style={{
                         flex: 1, padding: '14px', backgroundColor: 'transparent',
@@ -400,6 +422,7 @@ export default function ReservarFloat() {
                         {submitting ? 'Enviando...' : 'Confirmar cita'} <ChevronRight size={14} />
                       </button>
                     )}
+                  </div>
                   </div>
                 )}
               </motion.div>
