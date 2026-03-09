@@ -79,23 +79,23 @@ function DayButton({ label, selected, onSelect }: { label: string; selected: boo
 }
 
 async function checkAuthAndOpen(onSuccess: (nombre: string) => void) {
+  const supabase = createClient();
+  // getSession lee localStorage — sin red, instantáneo
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) {
+    window.location.href = '/login?from=reservar';
+    return;
+  }
+  const meta = session.user.user_metadata ?? {};
+  const fromMeta = `${meta.nombre ?? ''} ${meta.apellido ?? ''}`.trim();
+  if (fromMeta) { onSuccess(fromMeta); return; }
+  // Fallback: consultar profiles
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      window.location.href = '/login?from=reservar';
-      return;
-    }
-    // Nombre desde metadata (siempre disponible, sin consulta a BD)
-    const meta = user.user_metadata ?? {};
-    const fromMeta = `${meta.nombre ?? ''} ${meta.apellido ?? ''}`.trim();
-    if (fromMeta) { onSuccess(fromMeta); return; }
-    // Fallback: consultar profiles
-    const { data: prof } = await supabase.from('profiles').select('nombre, apellido').eq('id', user.id).maybeSingle();
+    const { data: prof } = await supabase.from('profiles').select('nombre, apellido').eq('id', session.user.id).maybeSingle();
     const fromProfile = prof ? `${prof.nombre ?? ''} ${prof.apellido ?? ''}`.trim() : '';
-    onSuccess(fromProfile || user.email?.split('@')[0] || '');
+    onSuccess(fromProfile || session.user.email?.split('@')[0] || '');
   } catch {
-    onSuccess('');
+    onSuccess(session.user.email?.split('@')[0] || '');
   }
 }
 
@@ -117,6 +117,15 @@ export default function ReservarFloat() {
       });
     };
     window.addEventListener('open-reservar', handler);
+
+    // Auto-abrir si viene de login con ?open=reservar
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('open') === 'reservar') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('open');
+      window.history.replaceState({}, '', url.toString());
+      handler();
+    }
+
     return () => window.removeEventListener('open-reservar', handler);
   }, []);
 

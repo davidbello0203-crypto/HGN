@@ -41,6 +41,7 @@ function ReservarBanner() {
 
 function LoginForm() {
   const router = useRouter();
+  const params = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -58,7 +59,6 @@ function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      // Verificar si el correo existe en la base de datos
       const { data: profile } = await supabase
         .from('profiles')
         .select('id')
@@ -74,7 +74,12 @@ function LoginForm() {
       return;
     }
 
-    router.push('/dashboard');
+    // Si venía de reservar, regresar a la landing y abrir el modal
+    if (params.get('from') === 'reservar') {
+      router.push('/?open=reservar');
+    } else {
+      router.push('/dashboard');
+    }
     router.refresh();
   };
 
