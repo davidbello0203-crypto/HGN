@@ -304,10 +304,10 @@ export default function DashboardPage() {
               <button key={t} onClick={() => setTab(t)}
                 style={{
                   padding: '10px 20px',
-                  borderTop: `1px solid ${tab === t ? '#F07820' : '#1A2418'}`,
-                  borderBottom: `1px solid ${tab === t ? '#F07820' : '#1A2418'}`,
-                  borderLeft: `1px solid ${tab === t ? '#F07820' : '#1A2418'}`,
-                  borderRight: i === 2 ? `1px solid ${tab === t ? '#F07820' : '#1A2418'}` : 'none',
+                  border: `1px solid ${tab === t ? '#F07820' : '#1A2418'}`,
+                  marginLeft: i > 0 ? '-1px' : 0,
+                  position: 'relative',
+                  zIndex: tab === t ? 1 : 0,
                   backgroundColor: tab === t ? 'rgba(240,120,32,0.1)' : 'transparent',
                   color: tab === t ? '#F07820' : 'rgba(240,240,240,0.4)',
                   fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase',
