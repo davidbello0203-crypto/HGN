@@ -122,7 +122,7 @@ export default function DashboardPage() {
     setSavingProfile(true);
     const supabase = createClient();
     await supabase.from('profiles').update(profileForm).eq('id', userId);
-    setProfile(profileForm);
+    setProfile((prev) => ({ ...profileForm, avatar_url: prev?.avatar_url }));
     setEditingProfile(false);
     setSavingProfile(false);
   };
@@ -157,11 +157,13 @@ export default function DashboardPage() {
     const supabase = createClient();
     const path = `${userId}/avatar.jpg`;
     const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
-    if (upErr) { setAvatarError(`Error: ${upErr.message}`); setUploadingAvatar(false); return; }
+    if (upErr) { setAvatarError(`Error al subir: ${upErr.message}`); setUploadingAvatar(false); return; }
     const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
-    const urlWithBust = `${publicUrl}?t=${Date.now()}`;
-    await supabase.from('profiles').update({ avatar_url: urlWithBust }).eq('id', userId);
-    setProfile((prev) => prev ? { ...prev, avatar_url: urlWithBust } : prev);
+    // Guardamos sin cache-bust para que persista igual en BD
+    const { error: dbErr } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', userId);
+    if (dbErr) { setAvatarError(`Error al guardar: ${dbErr.message}`); setUploadingAvatar(false); return; }
+    // Cache-bust solo en el estado local para forzar recarga de imagen
+    setProfile((prev) => prev ? { ...prev, avatar_url: `${publicUrl}?t=${Date.now()}` } : prev);
     setUploadingAvatar(false);
   };
 
