@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import {
   CalendarCheck, Clock, CheckCircle, XCircle, LogOut, Plus,
-  User, Phone, Mail, Edit2, Save, X, ArrowLeft, Dumbbell, Sparkles,
+  User, Phone, Mail, Edit2, Save, X, ArrowLeft, Dumbbell, Sparkles, Camera,
 } from 'lucide-react';
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
@@ -27,6 +27,7 @@ type Profile = {
   apellido: string;
   email: string;
   telefono: string;
+  avatar_url?: string;
 };
 
 const ESTADO = {
@@ -63,6 +64,8 @@ export default function DashboardPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [cancelingId, setCancelingId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
   const tip = TIPS[new Date().getDay() % TIPS.length];
 
   useEffect(() => {
@@ -111,6 +114,30 @@ export default function DashboardPage() {
     router.push('/');
   };
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !userId) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setAvatarError('Solo se aceptan imágenes JPG, PNG o WebP.'); return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      setAvatarError('La imagen no debe superar 3 MB.'); return;
+    }
+    setAvatarError('');
+    setUploadingAvatar(true);
+    const supabase = createClient();
+    const ext = file.name.split('.').pop();
+    const path = `${userId}/avatar.${ext}`;
+    const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+    if (upErr) { setAvatarError('Error al subir la imagen.'); setUploadingAvatar(false); return; }
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+    const urlWithBust = `${publicUrl}?t=${Date.now()}`;
+    await supabase.from('profiles').update({ avatar_url: urlWithBust }).eq('id', userId);
+    setProfile((prev) => prev ? { ...prev, avatar_url: urlWithBust } : prev);
+    setUploadingAvatar(false);
+    e.target.value = '';
+  };
+
   const proximas = reservas.filter(r => r.estado !== 'cancelada');
   const historial = reservas.filter(r => r.estado === 'cancelada');
   const nextCita = reservas.find(r => r.estado === 'confirmada') || reservas.find(r => r.estado === 'pendiente');
@@ -151,8 +178,10 @@ export default function DashboardPage() {
               style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px', transition: 'background 0.2s ease' }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(240,120,32,0.06)')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}>
-              <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(240,120,32,0.4) 0%, rgba(240,120,32,0.15) 100%)', border: '1px solid rgba(240,120,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '13px', fontWeight: 700, color: '#F07820', flexShrink: 0 }}>
-                {initials}
+              <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(240,120,32,0.4) 0%, rgba(240,120,32,0.15) 100%)', border: '1px solid rgba(240,120,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '13px', fontWeight: 700, color: '#F07820', flexShrink: 0, overflow: 'hidden' }}>
+                {profile?.avatar_url
+                  ? <img src={profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : initials}
               </div>
               <span className="dash-username" style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: 'rgba(240,240,240,0.75)', fontWeight: 500 }}>
                 {profile?.nombre} {profile?.apellido}
@@ -351,15 +380,35 @@ export default function DashboardPage() {
                 {/* Profile hero */}
                 <div style={{ background: 'linear-gradient(135deg, rgba(240,120,32,0.12) 0%, rgba(40,180,74,0.06) 100%)', borderBottom: '1px solid #1A2418', padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(240,120,32,0.5) 0%, rgba(240,120,32,0.2) 100%)', border: '2px solid rgba(240,120,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '24px', fontWeight: 700, color: '#F07820', flexShrink: 0 }}>
-                      {initials}
-                    </div>
+                    <label htmlFor="avatar-upload" style={{ position: 'relative', width: '72px', height: '72px', flexShrink: 0, cursor: 'pointer' }}
+                      title="Cambiar foto de perfil">
+                      <div className="avatar-ring" style={{ width: '72px', height: '72px', borderRadius: '50%', background: profile?.avatar_url ? 'transparent' : 'linear-gradient(135deg, rgba(240,120,32,0.5) 0%, rgba(240,120,32,0.2) 100%)', border: '2px solid rgba(240,120,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', transition: 'border-color 0.2s ease' }}>
+                        {uploadingAvatar ? (
+                          <div style={{ width: '22px', height: '22px', border: '2px solid rgba(240,120,32,0.3)', borderTopColor: '#F07820', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                        ) : profile?.avatar_url ? (
+                          <img src={profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <span style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '26px', fontWeight: 700, color: '#F07820' }}>{initials}</span>
+                        )}
+                      </div>
+                      {/* Overlay cámara */}
+                      {!uploadingAvatar && (
+                        <div className="avatar-overlay" style={{ position: 'absolute', inset: 0, borderRadius: '50%', backgroundColor: 'rgba(8,8,8,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s ease' }}>
+                          <Camera size={18} color="#F0F0F0" />
+                        </div>
+                      )}
+                      <input id="avatar-upload" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarChange} style={{ display: 'none' }} />
+                    </label>
                     <div>
                       <p style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.35)', marginBottom: '4px' }}>Perfil del usuario</p>
                       <p style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '22px', fontWeight: 700, color: '#F0F0F0', lineHeight: 1.1 }}>
                         {profile?.nombre} {profile?.apellido}
                       </p>
                       <p style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.4)', marginTop: '2px' }}>{profile?.email}</p>
+                      <p style={{ fontFamily: 'var(--font-inter)', fontSize: '11px', color: 'rgba(240,120,32,0.6)', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Camera size={11} /> Toca el avatar para cambiar la foto
+                      </p>
+                      {avatarError && <p style={{ fontFamily: 'var(--font-inter)', fontSize: '11px', color: '#FF6B6B', marginTop: '4px' }}>{avatarError}</p>}
                     </div>
                   </div>
                   {!editingProfile ? (
@@ -450,6 +499,8 @@ export default function DashboardPage() {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        label[for="avatar-upload"]:hover .avatar-overlay { opacity: 1 !important; }
+        label[for="avatar-upload"]:hover .avatar-ring { border-color: #F07820 !important; }
         @media (max-width: 640px) {
           .dash-stats { grid-template-columns: repeat(2, 1fr) !important; }
           .stat-sub { display: none; }

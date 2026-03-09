@@ -80,3 +80,24 @@ create trigger on_auth_user_created
 -- 4. Hacer admin a Bryan (ejecutar DESPUÉS de que Bryan se registre)
 -- Reemplaza el email con el de Bryan:
 -- update profiles set role = 'admin' where email = 'bryan@goodnutritionhabits.com';
+
+-- 5. Avatar de perfil — ejecutar en Supabase SQL Editor
+alter table public.profiles add column if not exists avatar_url text default null;
+
+-- 6. Storage bucket para avatares
+-- Ejecutar en Supabase → Storage → New bucket: "avatars", Public: true
+-- Luego ejecutar estas políticas:
+insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true)
+  on conflict (id) do nothing;
+
+create policy "Usuarios suben su avatar"
+  on storage.objects for insert
+  with check (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
+
+create policy "Usuarios actualizan su avatar"
+  on storage.objects for update
+  with check (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
+
+create policy "Avatares son públicos"
+  on storage.objects for select
+  using (bucket_id = 'avatars');
