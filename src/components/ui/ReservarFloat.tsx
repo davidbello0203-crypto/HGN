@@ -79,17 +79,19 @@ function DayButton({ label, selected, onSelect }: { label: string; selected: boo
 }
 
 async function checkAuthAndOpen(onSuccess: (nombre: string) => void) {
+  console.log('[Reservar] checkAuthAndOpen iniciado');
   const supabase = createClient();
-  // getSession lee localStorage — sin red, instantáneo
   const { data: { session } } = await supabase.auth.getSession();
+  console.log('[Reservar] session:', session ? `user=${session.user.email}` : 'null');
   if (!session?.user) {
+    console.log('[Reservar] sin sesión → redirigiendo a login');
     window.location.href = '/login?from=reservar';
     return;
   }
   const meta = session.user.user_metadata ?? {};
   const fromMeta = `${meta.nombre ?? ''} ${meta.apellido ?? ''}`.trim();
+  console.log('[Reservar] fromMeta:', fromMeta);
   if (fromMeta) { onSuccess(fromMeta); return; }
-  // Fallback: consultar profiles
   try {
     const { data: prof } = await supabase.from('profiles').select('nombre, apellido').eq('id', session.user.id).maybeSingle();
     const fromProfile = prof ? `${prof.nombre ?? ''} ${prof.apellido ?? ''}`.trim() : '';
@@ -109,13 +111,16 @@ export default function ReservarFloat() {
 
   useEffect(() => {
     const handler = () => {
+      console.log('[Reservar] evento open-reservar recibido');
       checkAuthAndOpen((nombre) => {
+        console.log('[Reservar] abriendo modal con nombre:', nombre);
         setForm({ ...EMPTY, nombre });
         setStep(0);
         setDone(false);
         setOpen(true);
       });
     };
+    console.log('[Reservar] listener registrado');
     window.addEventListener('open-reservar', handler);
 
     // Auto-abrir si viene de login con ?open=reservar
