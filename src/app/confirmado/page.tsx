@@ -2,6 +2,7 @@
 import { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
@@ -82,9 +83,9 @@ export default function ConfirmadoPage() {
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
         {/* Logo */}
         <div style={{ marginBottom: '48px' }}>
-          <a href="/" style={{ display: 'inline-block' }}>
+          <Link href="/" style={{ display: 'inline-block' }}>
             <Image src="/logo-gnh.png" alt="Good Nutrition Habits" width={140} height={56} style={{ objectFit: 'contain', height: '48px', width: 'auto' }} />
-          </a>
+          </Link>
         </div>
 
         <Suspense fallback={null}>
@@ -92,7 +93,7 @@ export default function ConfirmadoPage() {
         </Suspense>
 
         <p style={{ marginTop: '32px', fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.25)' }}>
-          <a href="/" style={{ color: 'inherit', textDecoration: 'none' }}>← Volver al inicio</a>
+          <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>← Volver al inicio</Link>
         </p>
       </div>
     </div>

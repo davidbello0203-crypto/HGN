@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
-const WA_MSG = encodeURIComponent('Hola Bryan, me gustaría agendar una cita de nutrición / entrenamiento. ¿Tienes disponibilidad?');
 
 export default function BookingCTA() {
   const [loggedIn, setLoggedIn] = useState(false);

@@ -2,6 +2,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -30,7 +31,7 @@ function RegistroForm() {
 
   useEffect(() => {
     const emailParam = params.get('email');
-    if (emailParam) setForm((prev) => ({ ...prev, email: emailParam }));
+    if (emailParam) setForm((prev) => ({ ...prev, email: emailParam })); // eslint-disable-line react-hooks/set-state-in-effect
   }, [params]);
 
   const [loading, setLoading] = useState(false);
@@ -106,9 +107,9 @@ function RegistroForm() {
           style={{ textAlign: 'center', maxWidth: '440px', width: '100%', position: 'relative', zIndex: 1 }}>
 
           <div style={{ marginBottom: '40px' }}>
-            <a href="/" style={{ display: 'inline-block' }}>
+            <Link href="/" style={{ display: 'inline-block' }}>
               <Image src="/logo-gnh.png" alt="Good Nutrition Habits" width={140} height={56} style={{ objectFit: 'contain', height: '48px', width: 'auto' }} />
-            </a>
+            </Link>
           </div>
 
           <div style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '40px 32px' }}>
@@ -178,7 +179,7 @@ function RegistroForm() {
           </div>
 
           <p style={{ marginTop: '24px', fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.25)' }}>
-            <a href="/" style={{ color: 'inherit', textDecoration: 'none' }}>← Volver al inicio</a>
+            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>← Volver al inicio</Link>
           </p>
         </motion.div>
       </div>
@@ -193,9 +194,9 @@ function RegistroForm() {
         style={{ width: '100%', maxWidth: '480px', position: 'relative', zIndex: 1 }}>
 
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <a href="/" style={{ display: 'inline-block' }}>
+          <Link href="/" style={{ display: 'inline-block' }}>
             <Image src="/logo-gnh.png" alt="Good Nutrition Habits" width={140} height={56} style={{ objectFit: 'contain', height: '52px', width: 'auto' }} />
-          </a>
+          </Link>
         </div>
 
         <div className="registro-card" style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '40px 36px' }}>
@@ -311,7 +312,7 @@ function RegistroForm() {
         </div>
 
         <p style={{ textAlign: 'center', fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.25)', marginTop: '24px' }}>
-          <a href="/" style={{ color: 'inherit', textDecoration: 'none' }}>← Volver al inicio</a>
+          <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>← Volver al inicio</Link>
         </p>
       </motion.div>
       <style>{`

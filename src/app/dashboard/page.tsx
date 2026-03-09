@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -208,15 +209,15 @@ export default function DashboardPage() {
 
           {/* Left: logo + back */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <a href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <Link href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
               <Image src="/logo-gnh.png" alt="GNH" width={100} height={40} style={{ objectFit: 'contain', height: '36px', width: 'auto' }} />
-            </a>
-            <a href="/"
+            </Link>
+            <Link href="/"
               style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.4)', textDecoration: 'none', transition: 'color 0.2s ease', whiteSpace: 'nowrap' }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#28B44A')}
               onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(240,240,240,0.4)')}>
               <ArrowLeft size={13} /> <span className="dash-back-label">Página de inicio</span>
-            </a>
+            </Link>
           </div>
 
           {/* Right: avatar + name + logout */}
@@ -227,7 +228,7 @@ export default function DashboardPage() {
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}>
               <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(240,120,32,0.4) 0%, rgba(240,120,32,0.15) 100%)', border: '1px solid rgba(240,120,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '13px', fontWeight: 700, color: '#F07820', flexShrink: 0, overflow: 'hidden' }}>
                 {profile?.avatar_url
-                  ? <img src={profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <Image src={profile.avatar_url} alt="Avatar" width={72} height={72} unoptimized style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : initials}
               </div>
               <span className="dash-username" style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: 'rgba(240,240,240,0.75)', fontWeight: 500 }}>
@@ -433,7 +434,7 @@ export default function DashboardPage() {
                         {uploadingAvatar ? (
                           <div style={{ width: '22px', height: '22px', border: '2px solid rgba(240,120,32,0.3)', borderTopColor: '#F07820', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                         ) : profile?.avatar_url ? (
-                          <img src={profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <Image src={profile.avatar_url} alt="Avatar" width={72} height={72} unoptimized style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                           <span style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '26px', fontWeight: 700, color: '#F07820' }}>{initials}</span>
                         )}

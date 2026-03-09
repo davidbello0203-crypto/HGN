@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -86,7 +87,7 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    loadData(); // eslint-disable-line react-hooks/set-state-in-effect
 
     // Real-time: escuchar nuevas reservas
     const supabase = createClient();
@@ -199,7 +200,7 @@ export default function AdminPage() {
       <header style={{ borderBottom: '1px solid #1A2418', backgroundColor: 'rgba(8,8,8,0.97)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 50 }}>
         <div className="container-gnh" style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <a href="/"><Image src="/logo-gnh.png" alt="GNH" width={100} height={40} style={{ objectFit: 'contain', height: '36px', width: 'auto' }} /></a>
+            <Link href="/"><Image src="/logo-gnh.png" alt="GNH" width={100} height={40} style={{ objectFit: 'contain', height: '36px', width: 'auto' }} /></Link>
             <span style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#F07820', border: '1px solid rgba(240,120,32,0.3)', padding: '3px 8px' }}>Admin</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
