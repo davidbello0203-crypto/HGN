@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
@@ -23,7 +23,10 @@ const inputStyle: React.CSSProperties = {
 
 function RegistroForm() {
   const params = useSearchParams();
+  const router = useRouter();
   const [form, setForm] = useState({ nombre: '', apellido: '', email: '', telefono: '', password: '', confirm: '' });
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   useEffect(() => {
     const emailParam = params.get('email');
@@ -36,6 +39,25 @@ function RegistroForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
+
+  useEffect(() => {
+    if (!success) return;
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') {
+        router.push('/dashboard');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [success, router]);
+
+  const handleResend = async () => {
+    setResending(true);
+    setResent(false);
+    await createClient().auth.resend({ type: 'signup', email: form.email });
+    setResent(true);
+    setResending(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,13 +126,22 @@ function RegistroForm() {
             <h2 style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '24px', fontWeight: 700, color: '#F0F0F0', marginBottom: '16px', lineHeight: 1.2 }}>
               Confirma tu correo
             </h2>
-            <p style={{ fontFamily: 'var(--font-inter)', fontSize: '14px', color: 'rgba(240,240,240,0.55)', lineHeight: 1.75, marginBottom: '28px' }}>
+            <p style={{ fontFamily: 'var(--font-inter)', fontSize: '14px', color: 'rgba(240,240,240,0.55)', lineHeight: 1.75, marginBottom: '24px' }}>
               Te enviamos un correo a{' '}
               <strong style={{ color: 'rgba(240,240,240,0.85)' }}>{form.email}</strong>.
               {' '}Ábrelo y haz clic en el enlace para activar tu cuenta.
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', marginBottom: '32px' }}>
+            {/* Indicador de espera */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
+              <div className="pulse-dot" style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#F07820' }} />
+              <span style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.4)', letterSpacing: '0.08em' }}>
+                Esperando confirmación...
+              </span>
+            </div>
+
+            {/* Pasos */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', marginBottom: '24px' }}>
               {[
                 ['1', 'Abre tu bandeja de entrada'],
                 ['2', 'Busca el correo de Good Nutrition Habits'],
@@ -123,6 +154,22 @@ function RegistroForm() {
                   <span style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: 'rgba(240,240,240,0.6)' }}>{text}</span>
                 </div>
               ))}
+            </div>
+
+            {/* Botón reenviar */}
+            <div style={{ marginBottom: '16px' }}>
+              {resent ? (
+                <p style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: '#28B44A', textAlign: 'center', padding: '12px 0' }}>
+                  ✓ Correo reenviado — revisa tu bandeja
+                </p>
+              ) : (
+                <button onClick={handleResend} disabled={resending}
+                  style={{ width: '100%', padding: '12px', backgroundColor: 'transparent', border: '1px solid #1A2418', color: resending ? 'rgba(240,240,240,0.25)' : 'rgba(240,240,240,0.5)', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', cursor: resending ? 'default' : 'pointer', transition: 'all 0.2s ease' }}
+                  onMouseEnter={(e) => { if (!resending) { e.currentTarget.style.borderColor = '#F07820'; e.currentTarget.style.color = '#F07820'; }}}
+                  onMouseLeave={(e) => { if (!resending) { e.currentTarget.style.borderColor = '#1A2418'; e.currentTarget.style.color = 'rgba(240,240,240,0.5)'; }}}>
+                  {resending ? 'Reenviando...' : 'Reenviar correo de confirmación'}
+                </button>
+              )}
             </div>
 
             <p style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.3)', lineHeight: 1.6 }}>
@@ -268,9 +315,9 @@ function RegistroForm() {
         </p>
       </motion.div>
       <style>{`
-        @media (max-width: 480px) {
-          .registro-card { padding: 28px 20px !important; }
-        }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.75); } }
+        .pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+        @media (max-width: 480px) { .registro-card { padding: 28px 20px !important; } }
       `}</style>
     </div>
   );
