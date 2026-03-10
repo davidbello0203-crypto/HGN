@@ -68,7 +68,9 @@ body {
 @media (min-width: 768px) {
   .nav-desktop { display: flex !important; }
   .nav-mobile-toggle { display: none !important; }
+  .ig-label { display: inline !important; }
 }
+.ig-label { display: none; }
 
 /* ── Custom cursor ─────────────────────────────────── */
 .custom-cursor { display: none; }

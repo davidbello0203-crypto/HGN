@@ -138,10 +138,11 @@ export default function Navbar() {
             {/* Actions right */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
               <a href="https://www.instagram.com/good_nutrition_habits" target="_blank" rel="noopener noreferrer"
-                style={{ display: 'flex', alignItems: 'center', color: 'rgba(240,240,240,0.5)', transition: 'color 0.3s ease' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#F07820')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(240,240,240,0.5)')}>
-                <Instagram size={16} />
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#F0F0F0', backgroundColor: 'rgba(240,120,32,0.12)', border: '1px solid rgba(240,120,32,0.35)', padding: '7px 12px', transition: 'all 0.3s ease', textDecoration: 'none', fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase' }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(240,120,32,0.25)'; e.currentTarget.style.borderColor = '#F07820'; e.currentTarget.style.color = '#F07820'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(240,120,32,0.12)'; e.currentTarget.style.borderColor = 'rgba(240,120,32,0.35)'; e.currentTarget.style.color = '#F0F0F0'; }}>
+                <Instagram size={14} />
+                <span className="ig-label">@GNH</span>
               </a>
               <button
                 onClick={() => {
