@@ -123,7 +123,7 @@ export default function Navbar() {
         <div className="container-gnh" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
           {/* Logo */}
           <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ textDecoration: 'none', lineHeight: 1, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            <Image src="/logo-gnh.png" alt="Good Nutrition Habits" width={120} height={48} style={{ objectFit: 'contain', height: '44px', width: 'auto' }} priority />
+            <Image src="/emblema-gnh.svg" alt="Good Nutrition Habits" width={44} height={44} style={{ objectFit: 'contain', height: '44px', width: '44px' }} priority />
           </a>
 
           {/* Desktop nav — links centrados */}
