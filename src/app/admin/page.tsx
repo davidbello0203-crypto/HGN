@@ -21,7 +21,7 @@ type Reserva = {
   notas_admin: string;
   estado: 'pendiente' | 'confirmada' | 'cancelada';
   created_at: string;
-  profiles: { nombre: string; apellido: string; email: string; telefono: string };
+  profiles: { nombre: string; apellido: string; email: string; telefono: string; avatar_url?: string | null };
 };
 
 type Cliente = {
@@ -61,7 +61,7 @@ export default function AdminPage() {
     const supabase = createClient();
     const { data: res } = await supabase
       .from('reservas')
-      .select('*, profiles(nombre, apellido, email, telefono)')
+      .select('*, profiles(nombre, apellido, email, telefono, avatar_url)')
       .order('created_at', { ascending: false });
 
     const { data: profs } = await supabase
@@ -298,8 +298,10 @@ export default function AdminPage() {
                         {/* Info cliente */}
                         <div style={{ flex: 1, minWidth: '200px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-                            <div style={{ width: '34px', height: '34px', borderRadius: '50%', backgroundColor: 'rgba(240,120,32,0.12)', border: '1px solid rgba(240,120,32,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '13px', fontWeight: 600, color: '#F07820', flexShrink: 0 }}>
-                              {r.profiles?.nombre?.[0]?.toUpperCase() || '?'}
+                            <div style={{ width: '34px', height: '34px', borderRadius: '50%', backgroundColor: 'rgba(240,120,32,0.12)', border: '1px solid rgba(240,120,32,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '13px', fontWeight: 600, color: '#F07820', flexShrink: 0, overflow: 'hidden' }}>
+                              {r.profiles?.avatar_url
+                                ? <Image unoptimized src={r.profiles.avatar_url} alt="" width={34} height={34} style={{ width: '34px', height: '34px', objectFit: 'cover' }} />
+                                : r.profiles?.nombre?.[0]?.toUpperCase() || '?'}
                             </div>
                             <div>
                               <div style={{ fontFamily: 'var(--font-inter)', fontSize: '14px', fontWeight: 600, color: '#F0F0F0' }}>{r.profiles?.nombre} {r.profiles?.apellido}</div>
@@ -439,8 +441,10 @@ export default function AdminPage() {
                       onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(240,120,32,0.3)')}
                       onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#1A2418')}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'rgba(240,120,32,0.12)', border: '1px solid rgba(240,120,32,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '13px', fontWeight: 600, color: '#F07820', flexShrink: 0 }}>
-                          {c.nombre?.[0]?.toUpperCase() || '?'}
+                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'rgba(240,120,32,0.12)', border: '1px solid rgba(240,120,32,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '13px', fontWeight: 600, color: '#F07820', flexShrink: 0, overflow: 'hidden' }}>
+                          {(c as Cliente & { avatar_url?: string }).avatar_url
+                            ? <Image unoptimized src={(c as Cliente & { avatar_url?: string }).avatar_url!} alt="" width={36} height={36} style={{ width: '36px', height: '36px', objectFit: 'cover' }} />
+                            : c.nombre?.[0]?.toUpperCase() || '?'}
                         </div>
                         <div>
                           <div style={{ fontFamily: 'var(--font-inter)', fontSize: '14px', fontWeight: 500, color: '#F0F0F0' }}>{c.nombre} {c.apellido}</div>
