@@ -352,14 +352,16 @@ export default function AdminPage() {
                           <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: estado.text, backgroundColor: estado.bg, border: `1px solid ${estado.border}`, padding: '4px 10px' }}>
                             {r.estado}
                           </span>
-                          {r.estado === 'pendiente' && (
+                          {(r.estado === 'pendiente' || r.estado === 'confirmada') && (
                             <div style={{ display: 'flex', gap: '6px' }}>
-                              <button onClick={() => updateEstado(r.id, 'confirmada')} disabled={isUpdating}
-                                style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 12px', backgroundColor: 'rgba(40,180,74,0.12)', border: '1px solid rgba(40,180,74,0.3)', color: '#28B44A', fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s ease' }}
-                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(40,180,74,0.22)')}
-                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(40,180,74,0.12)')}>
-                                <CheckCircle size={11} /> {isUpdating ? '...' : 'Confirmar'}
-                              </button>
+                              {r.estado === 'pendiente' && (
+                                <button onClick={() => updateEstado(r.id, 'confirmada')} disabled={isUpdating}
+                                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 12px', backgroundColor: 'rgba(40,180,74,0.12)', border: '1px solid rgba(40,180,74,0.3)', color: '#28B44A', fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s ease' }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(40,180,74,0.22)')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(40,180,74,0.12)')}>
+                                  <CheckCircle size={11} /> {isUpdating ? '...' : 'Confirmar'}
+                                </button>
+                              )}
                               <button onClick={() => updateEstado(r.id, 'cancelada')} disabled={isUpdating}
                                 style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 12px', backgroundColor: 'rgba(255,107,107,0.08)', border: '1px solid rgba(255,107,107,0.2)', color: '#FF6B6B', fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s ease' }}
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,107,107,0.15)')}

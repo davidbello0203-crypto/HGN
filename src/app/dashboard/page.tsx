@@ -403,7 +403,7 @@ export default function DashboardPage() {
                           <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: est.text, backgroundColor: est.bg, border: `1px solid ${est.border}`, padding: '5px 12px', whiteSpace: 'nowrap' }}>
                             {est.label}
                           </span>
-                          {r.estado === 'pendiente' && (
+                          {(r.estado === 'pendiente' || r.estado === 'confirmada') && (
                             <button onClick={() => handleCancelar(r.id)} disabled={cancelingId === r.id}
                               style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 12px', backgroundColor: 'transparent', border: '1px solid rgba(255,107,107,0.2)', color: '#FF6B6B', fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s ease' }}
                               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,107,107,0.08)')}
