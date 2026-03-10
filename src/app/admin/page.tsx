@@ -598,57 +598,14 @@ export default function AdminPage() {
                   showNames={true}
                   tipoFilter={calTipoFilter}
                   onSelectSlot={(dia, horario) => {
-                    const hasSlot = reservas.some(r => r.dia === dia && r.horario === horario && r.estado !== 'cancelada');
-                    setCalSelectedSlot(hasSlot ? { dia, horario } : null);
+                    const match = reservas.find(r => r.dia === dia && r.horario === horario && r.estado !== 'cancelada');
+                    if (match) {
+                      setDetailReserva(match);
+                      setDetailNoteText(match.notas_admin || '');
+                      setDetailEditingNote(false);
+                    }
                   }}
                 />
-
-                {/* Slot detail */}
-                {calSelectedSlot && slotDetail.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    style={{ marginTop: '16px', backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '20px 24px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                      <p style={{ fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#F07820' }}>
-                        {calSelectedSlot.dia} · {calSelectedSlot.horario}
-                      </p>
-                      <button onClick={() => setCalSelectedSlot(null)}
-                        style={{ background: 'none', border: 'none', color: 'rgba(240,240,240,0.35)', cursor: 'pointer', padding: '4px' }}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                    {slotDetail.map(r => {
-                      const est = ESTADO_COLORS[r.estado];
-                      return (
-                        <div key={r.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '10px 0', borderBottom: '1px solid #1A2418', flexWrap: 'wrap' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: 'rgba(240,120,32,0.12)', border: '1px solid rgba(240,120,32,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '11px', fontWeight: 600, color: '#F07820', flexShrink: 0 }}>
-                              {r.profiles?.nombre?.[0]?.toUpperCase() || '?'}
-                            </div>
-                            <div>
-                              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', fontWeight: 500, color: '#F0F0F0' }}>{r.profiles?.nombre} {r.profiles?.apellido}</div>
-                              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '11px', color: 'rgba(240,240,240,0.4)' }}>{r.servicio}</div>
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{
-                              fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase',
-                              padding: '3px 8px',
-                              backgroundColor: (r.tipo ?? 'nutricion') === 'entrenamiento' ? 'rgba(40,180,74,0.1)' : 'rgba(240,120,32,0.1)',
-                              border: `1px solid ${(r.tipo ?? 'nutricion') === 'entrenamiento' ? 'rgba(40,180,74,0.3)' : 'rgba(240,120,32,0.3)'}`,
-                              color: (r.tipo ?? 'nutricion') === 'entrenamiento' ? '#28B44A' : '#F07820',
-                            }}>
-                              {(r.tipo ?? 'nutricion') === 'entrenamiento' ? 'Entrenamiento' : 'Nutricion'}
-                            </span>
-                            <span style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: est.text, backgroundColor: est.bg, border: `1px solid ${est.border}`, padding: '3px 8px' }}>
-                              {r.estado}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </motion.div>
-                )}
               </motion.div>
             );
           })()}
