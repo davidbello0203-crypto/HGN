@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
-import { User } from 'lucide-react';
+import { User, Instagram } from 'lucide-react';
 
 const NAV_LINKS = [
   { label: 'Inicio', href: '#inicio' },
@@ -137,6 +137,12 @@ export default function Navbar() {
 
             {/* Actions right */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+              <a href="https://www.instagram.com/good_nutrition_habits" target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', color: 'rgba(240,240,240,0.5)', transition: 'color 0.3s ease' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#F07820')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(240,240,240,0.5)')}>
+                <Instagram size={16} />
+              </a>
               <button
                 onClick={() => {
                   if (userEmail) window.dispatchEvent(new CustomEvent('open-reservar'));
