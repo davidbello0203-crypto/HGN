@@ -7,8 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import {
   CalendarCheck, Clock, CheckCircle, XCircle, LogOut, Plus,
-  User, Phone, Mail, Edit2, Save, X, ArrowLeft, Dumbbell, Sparkles, Camera,
+  User, Phone, Mail, Edit2, Save, X, ArrowLeft, Dumbbell, Sparkles, Camera, CalendarDays, Loader2,
 } from 'lucide-react';
+import WeeklyCalendar, { type CalSlot } from '@/components/ui/WeeklyCalendar';
 import AvatarCrop from '@/components/ui/AvatarCrop';
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
@@ -54,7 +55,7 @@ const TIPS = [
   'La nutrición es el 70% del resultado.',
 ];
 
-type Tab = 'proximas' | 'historial' | 'perfil';
+type Tab = 'proximas' | 'historial' | 'calendario' | 'perfil';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -71,6 +72,9 @@ export default function DashboardPage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState('');
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [allSlots, setAllSlots] = useState<CalSlot[]>([]);
+  const [loadingCalendar, setLoadingCalendar] = useState(false);
+  const [calDashFilter, setCalDashFilter] = useState<'todas' | 'nutricion' | 'entrenamiento'>('todas');
   const tip = TIPS[new Date().getDay() % TIPS.length];
 
   useEffect(() => {
@@ -130,6 +134,31 @@ export default function DashboardPage() {
     setReservas(data || []);
   };
 
+  const loadCalendarSlots = async () => {
+    if (!userId) return;
+    setLoadingCalendar(true);
+    try {
+      const supabase = createClient();
+      // Get all active reservas (only public data: dia, horario, tipo, estado, user_id)
+      const { data } = await supabase
+        .from('reservas')
+        .select('dia, horario, tipo, estado, user_id')
+        .in('estado', ['pendiente', 'confirmada']);
+      setAllSlots(
+        (data || []).map((r: { dia: string; horario: string; tipo: string; estado: string; user_id: string }) => ({
+          dia: r.dia,
+          horario: r.horario,
+          tipo: (r.tipo ?? 'nutricion') as 'nutricion' | 'entrenamiento',
+          estado: r.estado,
+          isMine: r.user_id === userId,
+        }))
+      );
+    } catch {
+      setAllSlots([]);
+    }
+    setLoadingCalendar(false);
+  };
+
   const handleCancelar = async (id: string) => {
     setCancelingId(id);
     const supabase = createClient();
@@ -187,6 +216,11 @@ export default function DashboardPage() {
     setProfile((prev) => prev ? { ...prev, avatar_url: `${publicUrl}?t=${Date.now()}` } : prev);
     setUploadingAvatar(false);
   };
+
+  // Load calendar slots when tab changes to calendario
+  useEffect(() => {
+    if (tab === 'calendario' && allSlots.length === 0) loadCalendarSlots();
+  }, [tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const proximas = reservas.filter(r => r.estado !== 'cancelada');
   const historial = reservas.filter(r => r.estado === 'cancelada');
@@ -323,7 +357,7 @@ export default function DashboardPage() {
         {/* ── Tabs + botón ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
           <div className="dash-tabs-bar" style={{ display: 'flex', gap: '0' }}>
-            {([['proximas', 'Mis citas'], ['historial', 'Canceladas'], ['perfil', 'Mi perfil']] as [Tab, string][]).map(([t, label], i) => (
+            {([['proximas', 'Mis citas'], ['calendario', 'Calendario'], ['historial', 'Canceladas'], ['perfil', 'Mi perfil']] as [Tab, string][]).map(([t, label], i) => (
               <button key={t} onClick={() => setTab(t)}
                 style={{
                   padding: '10px 20px',
@@ -480,6 +514,70 @@ export default function DashboardPage() {
                   ))}
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {/* Calendario */}
+          {tab === 'calendario' && (
+            <motion.div key="calendario" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h2 style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#F0F0F0', marginBottom: '4px' }}>
+                    Disponibilidad semanal
+                  </h2>
+                  <p style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.35)' }}>
+                    Consulta los horarios ocupados y tus citas agendadas
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0' }}>
+                  {([
+                    ['todas', 'Todas'],
+                    ['nutricion', 'Nutricion'],
+                    ['entrenamiento', 'Entrenamiento'],
+                  ] as ['todas' | 'nutricion' | 'entrenamiento', string][]).map(([t, label], i) => (
+                    <button key={t} onClick={() => setCalDashFilter(t)}
+                      style={{
+                        padding: '8px 16px',
+                        border: `1px solid ${calDashFilter === t ? '#28B44A' : '#1A2418'}`,
+                        marginLeft: i > 0 ? '-1px' : 0,
+                        position: 'relative', zIndex: calDashFilter === t ? 1 : 0,
+                        backgroundColor: calDashFilter === t ? 'rgba(40,180,74,0.1)' : '#090C08',
+                        color: calDashFilter === t ? '#28B44A' : 'rgba(240,240,240,0.45)',
+                        fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                        cursor: 'pointer', transition: 'all 0.2s ease', whiteSpace: 'nowrap',
+                      }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {loadingCalendar ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 0', gap: '10px' }}>
+                  <Loader2 size={20} color="#F07820" style={{ animation: 'spin 0.8s linear infinite' }} />
+                  <span style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: 'rgba(240,240,240,0.4)' }}>Cargando calendario...</span>
+                </div>
+              ) : (
+                <WeeklyCalendar
+                  slots={allSlots}
+                  mode="view"
+                  tipoFilter={calDashFilter}
+                  onSelectSlot={(dia, horario) => {
+                    // If clicking on an empty slot, open reservar modal
+                    const taken = allSlots.some(s => s.dia === dia && s.horario === horario);
+                    if (!taken) {
+                      window.dispatchEvent(new CustomEvent('open-reservar'));
+                    }
+                  }}
+                />
+              )}
+
+              <div style={{ marginTop: '16px', padding: '14px 20px', backgroundColor: '#090C08', border: '1px solid #1A2418', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <CalendarDays size={15} color="rgba(240,240,240,0.3)" />
+                <p style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.35)' }}>
+                  Haz clic en un horario libre para reservar una nueva cita.
+                </p>
+              </div>
             </motion.div>
           )}
 

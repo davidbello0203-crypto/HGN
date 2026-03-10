@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { CalendarCheck, Users, Clock, CheckCircle, XCircle, MessageCircle, LogOut, Search, Download, Edit2, Save, X, TrendingUp, Filter } from 'lucide-react';
+import { CalendarCheck, Users, Clock, CheckCircle, XCircle, MessageCircle, LogOut, Search, Download, Edit2, Save, X, TrendingUp, Filter, CalendarDays } from 'lucide-react';
+import WeeklyCalendar, { type CalSlot } from '@/components/ui/WeeklyCalendar';
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
 
@@ -42,7 +43,7 @@ const ESTADO_COLORS = {
   cancelada:  { bg: 'rgba(255,107,107,0.08)', border: 'rgba(255,107,107,0.2)', text: '#FF6B6B' },
 };
 
-type Tab = 'citas' | 'clientes' | 'estadisticas';
+type Tab = 'citas' | 'clientes' | 'estadisticas' | 'calendario';
 type FilterEstado = 'todas' | 'pendiente' | 'confirmada' | 'cancelada';
 type FilterTipo = 'todas' | 'nutricion' | 'entrenamiento';
 
@@ -60,6 +61,8 @@ export default function AdminPage() {
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [noteText, setNoteText] = useState('');
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [calTipoFilter, setCalTipoFilter] = useState<'todas' | 'nutricion' | 'entrenamiento'>('todas');
+  const [calSelectedSlot, setCalSelectedSlot] = useState<{ dia: string; horario: string } | null>(null);
 
   const loadData = useCallback(async () => {
     const supabase = createClient();
@@ -255,7 +258,7 @@ export default function AdminPage() {
         {/* Tabs */}
         <div className="admin-toolbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
           <div className="admin-tabs-bar" style={{ display: 'flex', gap: '4px' }}>
-            {([['citas', 'Citas', CalendarCheck], ['clientes', 'Clientes', Users], ['estadisticas', 'Estadísticas', TrendingUp]] as [Tab, string, React.ElementType][]).map(([t, label, Icon]) => (
+            {([['citas', 'Citas', CalendarCheck], ['calendario', 'Calendario', CalendarDays], ['clientes', 'Clientes', Users], ['estadisticas', 'Estadísticas', TrendingUp]] as [Tab, string, React.ElementType][]).map(([t, label, Icon]) => (
               <button key={t} onClick={() => setTab(t)}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', border: `1px solid ${tab === t ? '#F07820' : '#1A2418'}`, backgroundColor: tab === t ? 'rgba(240,120,32,0.1)' : 'transparent', color: tab === t ? '#F07820' : 'rgba(240,240,240,0.45)', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s ease' }}>
                 <Icon size={12} /> {label}
@@ -264,7 +267,7 @@ export default function AdminPage() {
           </div>
 
           {/* Search */}
-          {tab !== 'estadisticas' && (
+          {tab !== 'estadisticas' && tab !== 'calendario' && (
             <div className="admin-search-wrap" style={{ position: 'relative' }}>
               <Search size={13} color="rgba(240,240,240,0.3)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input placeholder="Buscar cliente..." value={search} onChange={(e) => setSearch(e.target.value)}
@@ -526,6 +529,117 @@ export default function AdminPage() {
               )}
             </motion.div>
           )}
+
+          {/* TAB: CALENDARIO */}
+          {tab === 'calendario' && (() => {
+            const calSlots: CalSlot[] = reservas
+              .filter(r => r.estado !== 'cancelada')
+              .map(r => ({
+                dia: r.dia,
+                horario: r.horario,
+                tipo: (r.tipo ?? 'nutricion') as 'nutricion' | 'entrenamiento',
+                estado: r.estado,
+                clientName: r.profiles ? `${r.profiles.nombre} ${r.profiles.apellido}`.trim() : undefined,
+              }));
+
+            const slotDetail = calSelectedSlot
+              ? reservas.filter(r => r.dia === calSelectedSlot.dia && r.horario === calSelectedSlot.horario && r.estado !== 'cancelada')
+              : [];
+
+            return (
+              <motion.div key="calendario" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: '20px', fontWeight: 700, color: '#F0F0F0', marginBottom: '4px' }}>
+                      Vista semanal de disponibilidad
+                    </h2>
+                    <p style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.35)' }}>
+                      Haz clic en una celda ocupada para ver detalles
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0' }}>
+                    {([
+                      ['todas', 'Todas'],
+                      ['nutricion', 'Nutricion'],
+                      ['entrenamiento', 'Entrenamiento'],
+                    ] as ['todas' | 'nutricion' | 'entrenamiento', string][]).map(([t, label], i) => (
+                      <button key={t} onClick={() => setCalTipoFilter(t)}
+                        style={{
+                          padding: '8px 16px',
+                          border: `1px solid ${calTipoFilter === t ? '#28B44A' : '#1A2418'}`,
+                          marginLeft: i > 0 ? '-1px' : 0,
+                          position: 'relative', zIndex: calTipoFilter === t ? 1 : 0,
+                          backgroundColor: calTipoFilter === t ? 'rgba(40,180,74,0.1)' : '#090C08',
+                          color: calTipoFilter === t ? '#28B44A' : 'rgba(240,240,240,0.45)',
+                          fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                          cursor: 'pointer', transition: 'all 0.2s ease', whiteSpace: 'nowrap',
+                        }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <WeeklyCalendar
+                  slots={calSlots}
+                  mode="view"
+                  showNames={true}
+                  tipoFilter={calTipoFilter}
+                  onSelectSlot={(dia, horario) => {
+                    const hasSlot = reservas.some(r => r.dia === dia && r.horario === horario && r.estado !== 'cancelada');
+                    setCalSelectedSlot(hasSlot ? { dia, horario } : null);
+                  }}
+                />
+
+                {/* Slot detail */}
+                {calSelectedSlot && slotDetail.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                    style={{ marginTop: '16px', backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '20px 24px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                      <p style={{ fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#F07820' }}>
+                        {calSelectedSlot.dia} · {calSelectedSlot.horario}
+                      </p>
+                      <button onClick={() => setCalSelectedSlot(null)}
+                        style={{ background: 'none', border: 'none', color: 'rgba(240,240,240,0.35)', cursor: 'pointer', padding: '4px' }}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                    {slotDetail.map(r => {
+                      const est = ESTADO_COLORS[r.estado];
+                      return (
+                        <div key={r.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '10px 0', borderBottom: '1px solid #1A2418', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: 'rgba(240,120,32,0.12)', border: '1px solid rgba(240,120,32,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '11px', fontWeight: 600, color: '#F07820', flexShrink: 0 }}>
+                              {r.profiles?.nombre?.[0]?.toUpperCase() || '?'}
+                            </div>
+                            <div>
+                              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', fontWeight: 500, color: '#F0F0F0' }}>{r.profiles?.nombre} {r.profiles?.apellido}</div>
+                              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '11px', color: 'rgba(240,240,240,0.4)' }}>{r.servicio}</div>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{
+                              fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                              padding: '3px 8px',
+                              backgroundColor: (r.tipo ?? 'nutricion') === 'entrenamiento' ? 'rgba(40,180,74,0.1)' : 'rgba(240,120,32,0.1)',
+                              border: `1px solid ${(r.tipo ?? 'nutricion') === 'entrenamiento' ? 'rgba(40,180,74,0.3)' : 'rgba(240,120,32,0.3)'}`,
+                              color: (r.tipo ?? 'nutricion') === 'entrenamiento' ? '#28B44A' : '#F07820',
+                            }}>
+                              {(r.tipo ?? 'nutricion') === 'entrenamiento' ? 'Entrenamiento' : 'Nutricion'}
+                            </span>
+                            <span style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: est.text, backgroundColor: est.bg, border: `1px solid ${est.border}`, padding: '3px 8px' }}>
+                              {r.estado}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </motion.div>
+            );
+          })()}
 
           {/* TAB: ESTADÍSTICAS */}
           {tab === 'estadisticas' && (

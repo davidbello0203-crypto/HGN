@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarCheck, X, ChevronRight, ChevronLeft, Check, Dumbbell, Sparkles } from 'lucide-react';
+import { CalendarCheck, X, ChevronRight, ChevronLeft, Check, Dumbbell, Sparkles, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import WeeklyCalendar, { type CalSlot } from '@/components/ui/WeeklyCalendar';
 
 const EXPO_OUT = [0.16, 1, 0.3, 1] as const;
 
@@ -97,6 +98,30 @@ export default function ReservarFloat() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [calSlots, setCalSlots] = useState<CalSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  const fetchSlots = async () => {
+    setLoadingSlots(true);
+    try {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('reservas')
+        .select('dia, horario, tipo, estado')
+        .in('estado', ['pendiente', 'confirmada']);
+      setCalSlots(
+        (data || []).map((r: { dia: string; horario: string; tipo: 'nutricion' | 'entrenamiento'; estado: string }) => ({
+          dia: r.dia,
+          horario: r.horario,
+          tipo: r.tipo ?? 'nutricion',
+          estado: r.estado,
+        }))
+      );
+    } catch {
+      setCalSlots([]);
+    }
+    setLoadingSlots(false);
+  };
 
   useEffect(() => {
     createClient().auth.getSession().then(({ data: { session } }) => setIsLoggedIn(!!session?.user));
@@ -112,6 +137,7 @@ export default function ReservarFloat() {
       setSubmitError('');
       setOpen(true);
       fetchNombre().then((nombre) => { if (nombre) setForm((prev) => ({ ...prev, nombre })); });
+      fetchSlots();
     };
     window.addEventListener('open-reservar', handler);
     if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('open') === 'reservar') {
@@ -288,7 +314,7 @@ export default function ReservarFloat() {
                 exit={{ opacity: 0, y: 24, scale: 0.97 }}
                 transition={{ duration: 0.45, ease: EXPO_OUT }}
                 style={{
-                  pointerEvents: 'auto', width: '100%', maxWidth: '540px',
+                  pointerEvents: 'auto', width: '100%', maxWidth: '680px',
                   maxHeight: 'calc(100vh - 48px)', backgroundColor: '#090C08',
                   border: '1px solid #1A2418', boxShadow: '0 40px 100px rgba(0,0,0,0.75)',
                   display: 'flex', flexDirection: 'column', overflow: 'hidden',
@@ -389,29 +415,32 @@ export default function ReservarFloat() {
                       </motion.div>
                     )}
 
-                    {/* Step 1 — Horario cita 1 (nutricion o servicio único) */}
+                    {/* Step 1 — Horario cita 1 (nutricion o servicio único) — Calendario semanal */}
                     {!done && step === 1 && (
                       <motion.div key="s1" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.3 }}>
-                        <label style={{ display: 'block', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.45)', marginBottom: '12px' }}>
-                          Día preferido
+                        <label style={{ display: 'block', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.45)', marginBottom: '6px' }}>
+                          Selecciona un horario disponible
                         </label>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '24px' }}>
-                          {DIAS.map((d) => (
-                            <DayButton key={d} label={d} selected={currentDia === d} onSelect={() => selectDay(d, diaField as 'dia' | 'dia2')} />
-                          ))}
-                        </div>
-                        <label style={{ display: 'block', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.45)', marginBottom: '8px' }}>
-                          Horario preferido
-                        </label>
-                        <p style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.30)', marginBottom: '12px' }}>
-                          Al seleccionar horario avanzará automáticamente
+                        <p style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.30)', marginBottom: '16px' }}>
+                          Toca una celda libre para elegir dia y hora. Avanzara automaticamente.
                         </p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          {HORARIOS.map((h) => (
-                            <OptionButton key={h} label={h} selected={currentHorario === h}
-                              onSelect={() => selectHorario(h, horarioField as 'horario' | 'horario2')} />
-                          ))}
-                        </div>
+                        {loadingSlots ? (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: '10px' }}>
+                            <Loader2 size={18} color="#F07820" style={{ animation: 'spin 0.8s linear infinite' }} />
+                            <span style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.4)' }}>Cargando disponibilidad...</span>
+                          </div>
+                        ) : (
+                          <WeeklyCalendar
+                            slots={calSlots}
+                            mode="select"
+                            selectedDia={currentDia}
+                            selectedHorario={currentHorario}
+                            onSelectSlot={(dia, horario) => {
+                              setForm(prev => ({ ...prev, [diaField]: dia, [horarioField]: horario }));
+                              setTimeout(() => setStep(s => s + 1), 350);
+                            }}
+                          />
+                        )}
                       </motion.div>
                     )}
 
@@ -441,29 +470,32 @@ export default function ReservarFloat() {
                       </motion.div>
                     )}
 
-                    {/* Step 3 — Horario cita 2 (entrenamiento) — solo ambos */}
+                    {/* Step 3 — Horario cita 2 (entrenamiento) — solo ambos — Calendario semanal */}
                     {!done && step === 3 && isAmbos && (
                       <motion.div key="s3" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.3 }}>
-                        <label style={{ display: 'block', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.45)', marginBottom: '12px' }}>
-                          Día preferido
+                        <label style={{ display: 'block', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.45)', marginBottom: '6px' }}>
+                          Selecciona horario para entrenamiento
                         </label>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '24px' }}>
-                          {DIAS.map((d) => (
-                            <DayButton key={d} label={d} selected={form.dia2 === d} onSelect={() => selectDay(d, 'dia2')} />
-                          ))}
-                        </div>
-                        <label style={{ display: 'block', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.45)', marginBottom: '8px' }}>
-                          Horario preferido
-                        </label>
-                        <p style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.30)', marginBottom: '12px' }}>
-                          Al seleccionar horario avanzará automáticamente
+                        <p style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.30)', marginBottom: '16px' }}>
+                          Elige un horario distinto al de tu consulta de nutricion.
                         </p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          {HORARIOS.map((h) => (
-                            <OptionButton key={h} label={h} selected={form.horario2 === h}
-                              onSelect={() => selectHorario(h, 'horario2')} />
-                          ))}
-                        </div>
+                        {loadingSlots ? (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: '10px' }}>
+                            <Loader2 size={18} color="#28B44A" style={{ animation: 'spin 0.8s linear infinite' }} />
+                            <span style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', color: 'rgba(240,240,240,0.4)' }}>Cargando disponibilidad...</span>
+                          </div>
+                        ) : (
+                          <WeeklyCalendar
+                            slots={calSlots}
+                            mode="select"
+                            selectedDia={form.dia2}
+                            selectedHorario={form.horario2}
+                            onSelectSlot={(dia, horario) => {
+                              setForm(prev => ({ ...prev, dia2: dia, horario2: horario }));
+                              setTimeout(() => setStep(s => s + 1), 350);
+                            }}
+                          />
+                        )}
                       </motion.div>
                     )}
 
@@ -574,6 +606,7 @@ export default function ReservarFloat() {
         )}
       </AnimatePresence>
       <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 480px) {
           .reservar-header { padding: 20px 20px 16px !important; }
           .reservar-content { padding: 20px !important; }
