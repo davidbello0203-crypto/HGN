@@ -63,6 +63,9 @@ export default function AdminPage() {
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [calTipoFilter, setCalTipoFilter] = useState<'todas' | 'nutricion' | 'entrenamiento'>('todas');
   const [calSelectedSlot, setCalSelectedSlot] = useState<{ dia: string; horario: string } | null>(null);
+  const [detailReserva, setDetailReserva] = useState<Reserva | null>(null);
+  const [detailNoteText, setDetailNoteText] = useState('');
+  const [detailEditingNote, setDetailEditingNote] = useState(false);
 
   const loadData = useCallback(async () => {
     const supabase = createClient();
@@ -328,7 +331,10 @@ export default function AdminPage() {
                   const isUpdating = updating === r.id;
                   return (
                     <motion.div key={r.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: i * 0.04, ease: EXPO_OUT }}
-                      style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '20px 24px' }}>
+                      onClick={() => { setDetailReserva(r); setDetailNoteText(r.notas_admin || ''); setDetailEditingNote(false); }}
+                      style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '20px 24px', cursor: 'pointer', transition: 'border-color 0.2s ease' }}
+                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(240,120,32,0.35)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#1A2418')}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
                         {/* Info cliente */}
                         <div style={{ flex: 1, minWidth: '200px' }}>
@@ -442,6 +448,12 @@ export default function AdminPage() {
                             </a>
                           )}
                         </div>
+                      </div>
+                      {/* Hint */}
+                      <div style={{ borderTop: '1px solid #1A2418', marginTop: '12px', paddingTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                        <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.2)' }}>
+                          Ver detalles →
+                        </span>
                       </div>
                     </motion.div>
                   );
@@ -708,6 +720,184 @@ export default function AdminPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* ── Modal detalle de cita ── */}
+      <AnimatePresence>
+        {detailReserva && (() => {
+          const r = detailReserva;
+          const est = ESTADO_COLORS[r.estado];
+          const isNutri = (r.tipo ?? 'nutricion') !== 'entrenamiento';
+          const isUpdatingModal = updating === r.id;
+          return (
+            <>
+              <motion.div key="detail-backdrop"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                onClick={() => setDetailReserva(null)}
+                style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(8,8,8,0.85)', backdropFilter: 'blur(8px)', zIndex: 200 }} />
+
+              <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 201, padding: '24px', pointerEvents: 'none' }}>
+                <motion.div key="detail-panel"
+                  initial={{ opacity: 0, y: 32, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 20, scale: 0.97 }}
+                  transition={{ duration: 0.35, ease: EXPO_OUT }}
+                  style={{
+                    pointerEvents: 'auto', width: '100%', maxWidth: '520px',
+                    maxHeight: 'calc(100vh - 48px)', overflowY: 'auto',
+                    backgroundColor: '#090C08', border: '1px solid #1A2418',
+                    boxShadow: '0 40px 100px rgba(0,0,0,0.8)',
+                  }}>
+
+                  {/* Header del modal */}
+                  <div style={{ padding: '24px 28px 20px', borderBottom: '1px solid #1A2418', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', background: 'linear-gradient(135deg, rgba(240,120,32,0.07) 0%, transparent 60%)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: 'rgba(240,120,32,0.12)', border: '1px solid rgba(240,120,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '18px', fontWeight: 700, color: '#F07820', flexShrink: 0, overflow: 'hidden' }}>
+                        {r.profiles?.avatar_url
+                          ? <Image unoptimized src={r.profiles.avatar_url} alt="" width={52} height={52} style={{ width: '52px', height: '52px', objectFit: 'cover' }} />
+                          : r.profiles?.nombre?.[0]?.toUpperCase() || '?'}
+                      </div>
+                      <div>
+                        <p style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#F07820', marginBottom: '4px' }}>Detalle de cita</p>
+                        <h3 style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#F0F0F0', lineHeight: 1.1 }}>
+                          {r.profiles?.nombre} {r.profiles?.apellido}
+                        </h3>
+                      </div>
+                    </div>
+                    <button onClick={() => setDetailReserva(null)}
+                      style={{ background: 'none', border: 'none', color: 'rgba(240,240,240,0.35)', cursor: 'pointer', padding: '4px', flexShrink: 0 }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = '#F0F0F0')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(240,240,240,0.35)')}>
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                    {/* Estado + tipo */}
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: est.text, backgroundColor: est.bg, border: `1px solid ${est.border}`, padding: '5px 12px' }}>
+                        {r.estado}
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600, padding: '5px 12px', backgroundColor: isNutri ? 'rgba(240,120,32,0.1)' : 'rgba(40,180,74,0.1)', border: `1px solid ${isNutri ? 'rgba(240,120,32,0.3)' : 'rgba(40,180,74,0.3)'}`, color: isNutri ? '#F07820' : '#28B44A' }}>
+                        {isNutri ? '🥗 Nutrición' : '🏋️ Entrenamiento'}
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', color: 'rgba(240,240,240,0.3)', padding: '5px 0', marginLeft: 'auto' }}>
+                        {new Date(r.created_at).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
+
+                    {/* Info de contacto */}
+                    <div style={{ backgroundColor: '#0F1208', border: '1px solid #1A2418', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <p style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '4px' }}>Contacto</p>
+                      {[
+                        ['Email', r.profiles?.email],
+                        ['Teléfono', r.profiles?.telefono || '—'],
+                      ].map(([label, val]) => (
+                        <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+                          <span style={{ fontFamily: 'var(--font-inter)', fontSize: '11px', color: 'rgba(240,240,240,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{label}</span>
+                          <span style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: '#F0F0F0', textAlign: 'right' }}>{val}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Detalles de la cita */}
+                    <div style={{ backgroundColor: '#0F1208', border: '1px solid #1A2418', padding: '16px 18px' }}>
+                      <p style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '14px' }}>Detalles de la cita</p>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                        {[
+                          ['Servicio', r.servicio],
+                          ['Día', r.dia],
+                          ['Horario', r.horario],
+                          ['Objetivo', r.objetivo],
+                        ].map(([label, val]) => (
+                          <div key={label}>
+                            <div style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '4px' }}>{label}</div>
+                            <div style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: '#F0F0F0', lineHeight: 1.4 }}>{val}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Notas del cliente */}
+                    {r.notas && (
+                      <div style={{ padding: '12px 16px', backgroundColor: 'rgba(240,240,240,0.02)', border: '1px solid #1A2418' }}>
+                        <p style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '6px' }}>Notas del cliente</p>
+                        <p style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: 'rgba(240,240,240,0.6)', lineHeight: 1.7 }}>{r.notas}</p>
+                      </div>
+                    )}
+
+                    {/* Nota interna admin */}
+                    <div>
+                      <p style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '8px' }}>Nota interna</p>
+                      {detailEditingNote ? (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <input value={detailNoteText} onChange={(e) => setDetailNoteText(e.target.value)}
+                            placeholder="Nota interna..."
+                            style={{ flex: 1, backgroundColor: '#0F1208', border: '1px solid #F07820', color: '#F0F0F0', fontFamily: 'var(--font-inter)', fontSize: '13px', padding: '10px 12px', outline: 'none' }} />
+                          <button onClick={async () => {
+                              const supabase = createClient();
+                              await supabase.from('reservas').update({ notas_admin: detailNoteText }).eq('id', r.id);
+                              await loadData();
+                              setDetailReserva(prev => prev ? { ...prev, notas_admin: detailNoteText } : null);
+                              setDetailEditingNote(false);
+                            }}
+                            style={{ padding: '10px 14px', backgroundColor: '#F07820', border: 'none', color: '#F0F0F0', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                            <Save size={13} />
+                          </button>
+                          <button onClick={() => setDetailEditingNote(false)}
+                            style={{ padding: '10px 10px', backgroundColor: 'transparent', border: '1px solid #1A2418', color: 'rgba(240,240,240,0.4)', cursor: 'pointer' }}>
+                            <X size={13} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button onClick={() => { setDetailNoteText(r.notas_admin || ''); setDetailEditingNote(true); }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: '1px solid #1A2418', color: r.notas_admin ? '#F07820' : 'rgba(240,240,240,0.3)', fontFamily: 'var(--font-inter)', fontSize: '12px', cursor: 'pointer', padding: '9px 14px', width: '100%', transition: 'all 0.2s ease' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#F07820'; e.currentTarget.style.color = '#F07820'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1A2418'; e.currentTarget.style.color = r.notas_admin ? '#F07820' : 'rgba(240,240,240,0.3)'; }}>
+                          <Edit2 size={12} /> {r.notas_admin || 'Agregar nota interna'}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Acciones */}
+                    {(r.estado === 'pendiente' || r.estado === 'confirmada') && (
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {r.estado === 'pendiente' && (
+                          <button onClick={() => { updateEstado(r.id, 'confirmada'); setDetailReserva(prev => prev ? { ...prev, estado: 'confirmada' } : null); }}
+                            disabled={isUpdatingModal}
+                            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '12px 16px', backgroundColor: 'rgba(40,180,74,0.12)', border: '1px solid rgba(40,180,74,0.35)', color: '#28B44A', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', cursor: isUpdatingModal ? 'default' : 'pointer', transition: 'all 0.2s ease' }}
+                            onMouseEnter={(e) => { if (!isUpdatingModal) e.currentTarget.style.backgroundColor = 'rgba(40,180,74,0.22)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(40,180,74,0.12)'; }}>
+                            <CheckCircle size={13} /> {isUpdatingModal ? 'Guardando...' : 'Confirmar cita'}
+                          </button>
+                        )}
+                        <button onClick={() => { updateEstado(r.id, 'cancelada'); setDetailReserva(prev => prev ? { ...prev, estado: 'cancelada' } : null); }}
+                          disabled={isUpdatingModal}
+                          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '12px 16px', backgroundColor: 'rgba(255,107,107,0.08)', border: '1px solid rgba(255,107,107,0.2)', color: '#FF6B6B', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', cursor: isUpdatingModal ? 'default' : 'pointer', transition: 'all 0.2s ease' }}
+                          onMouseEnter={(e) => { if (!isUpdatingModal) e.currentTarget.style.backgroundColor = 'rgba(255,107,107,0.16)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,107,107,0.08)'; }}>
+                          <XCircle size={13} /> Cancelar cita
+                        </button>
+                      </div>
+                    )}
+
+                    {/* WhatsApp */}
+                    {r.profiles?.telefono && (
+                      <a href={waLink(r)} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 16px', border: '1px solid #1A2418', color: 'rgba(240,240,240,0.5)', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', textDecoration: 'none', transition: 'all 0.2s ease' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#25D366'; e.currentTarget.style.color = '#25D366'; e.currentTarget.style.backgroundColor = 'rgba(37,211,102,0.06)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1A2418'; e.currentTarget.style.color = 'rgba(240,240,240,0.5)'; e.currentTarget.style.backgroundColor = 'transparent'; }}>
+                        <MessageCircle size={14} /> Enviar WhatsApp
+                      </a>
+                    )}
+                  </div>
+                </motion.div>
+              </div>
+            </>
+          );
+        })()}
+      </AnimatePresence>
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
