@@ -254,9 +254,17 @@ export default function DashboardPage() {
   const initials = `${profile?.nombre?.[0] || ''}${profile?.apellido?.[0] || ''}`.toUpperCase() || '?';
 
   if (loading) return (
-    <div style={{ minHeight: '100dvh', backgroundColor: '#080808', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-      <div style={{ width: '36px', height: '36px', border: '2px solid #1A2418', borderTopColor: '#F07820', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <p style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', letterSpacing: '0.15em', color: 'rgba(240,240,240,0.3)', textTransform: 'uppercase' }}>Cargando tu panel</p>
+    <div style={{ minHeight: '100dvh', backgroundColor: '#080808', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: EXPO_OUT }}
+        style={{ width: '44px', height: '44px', border: '2px solid #1A2418', borderTopColor: '#F07820', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <motion.p
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15, ease: EXPO_OUT }}
+        style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', letterSpacing: '0.15em', color: 'rgba(240,240,240,0.3)', textTransform: 'uppercase' }}>Cargando tu panel</motion.p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
@@ -265,8 +273,8 @@ export default function DashboardPage() {
     <div style={{ minHeight: '100dvh', backgroundColor: '#080808' }}>
 
       {/* ── Header ── */}
-      <header style={{ borderBottom: '1px solid #1A2418', backgroundColor: 'rgba(8,8,8,0.97)', backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 50 }}>
-        <div className="container-gnh" style={{ height: '68px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+      <header style={{ borderBottom: '1px solid #1A2418', backgroundColor: 'rgba(8,8,8,0.95)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 50 }}>
+        <div className="container-gnh" style={{ height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
 
           {/* Left: logo + back */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -307,47 +315,56 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <div className="container-gnh" style={{ paddingTop: '36px', paddingBottom: '80px' }}>
+      <div className="container-gnh" style={{ paddingTop: '44px', paddingBottom: '100px' }}>
 
         {/* ── Bienvenida ── */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EXPO_OUT }}
-          style={{ marginBottom: '32px' }}>
-          <p style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#F07820', marginBottom: '6px' }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EXPO_OUT }}
+          style={{ marginBottom: '40px' }}>
+          <p style={{ fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#F07820', marginBottom: '10px' }}>
             Tu panel
           </p>
-          <h1 style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '28px', fontWeight: 700, color: '#F0F0F0', lineHeight: 1.1, marginBottom: '8px' }}>
+          <h1 style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: 'clamp(26px, 5vw, 36px)', fontWeight: 700, color: '#F0F0F0', lineHeight: 1.1, marginBottom: '12px' }}>
             {firstName ? `Bienvenido, ${firstName}.` : 'Tu panel de salud.'}
           </h1>
-          <p style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: 'rgba(240,240,240,0.4)', fontStyle: 'italic' }}>
+          <motion.p
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: EXPO_OUT }}
+            style={{ fontFamily: 'var(--font-inter)', fontSize: '14px', color: 'rgba(240,240,240,0.4)', fontStyle: 'italic', lineHeight: 1.6 }}>
             {tip}
-          </p>
+          </motion.p>
         </motion.div>
 
-        {/* ── Próxima cita destacada ── */}
+        {/* ── Proxima cita destacada ── */}
         <AnimatePresence>
           {nextCita && (
             <motion.div
-              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.6, ease: EXPO_OUT }}
-              style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(240,120,32,0.1) 0%, rgba(40,180,74,0.07) 100%)', border: `1px solid ${nextCita.estado === 'confirmada' ? 'rgba(40,180,74,0.35)' : 'rgba(240,120,32,0.3)'}`, padding: '24px 28px', marginBottom: '28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '3px', height: '100%', backgroundColor: nextCita.estado === 'confirmada' ? '#28B44A' : '#F07820' }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-                <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: nextCita.estado === 'confirmada' ? 'rgba(40,180,74,0.15)' : 'rgba(240,120,32,0.15)', border: `1px solid ${nextCita.estado === 'confirmada' ? 'rgba(40,180,74,0.3)' : 'rgba(240,120,32,0.3)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {nextCita.servicio.toLowerCase().includes('entrena') ? <Dumbbell size={22} color={nextCita.estado === 'confirmada' ? '#28B44A' : '#F07820'} /> : <Sparkles size={22} color={nextCita.estado === 'confirmada' ? '#28B44A' : '#F07820'} />}
-                </div>
+              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.7, ease: EXPO_OUT }}
+              style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(240,120,32,0.1) 0%, rgba(40,180,74,0.07) 100%)', border: `1px solid ${nextCita.estado === 'confirmada' ? 'rgba(40,180,74,0.35)' : 'rgba(240,120,32,0.3)'}`, padding: '28px 32px', marginBottom: '36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', boxShadow: nextCita.estado === 'confirmada' ? '0 4px 32px rgba(40,180,74,0.08)' : '0 4px 32px rgba(240,120,32,0.08)', transition: 'box-shadow 0.4s ease, transform 0.3s ease' }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: nextCita.estado === 'confirmada' ? '#28B44A' : '#F07820' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.15, ease: EXPO_OUT }}
+                  style={{ width: '56px', height: '56px', borderRadius: '50%', background: nextCita.estado === 'confirmada' ? 'radial-gradient(circle at 30% 30%, rgba(40,180,74,0.25) 0%, rgba(40,180,74,0.08) 100%)' : 'radial-gradient(circle at 30% 30%, rgba(240,120,32,0.25) 0%, rgba(240,120,32,0.08) 100%)', border: `1px solid ${nextCita.estado === 'confirmada' ? 'rgba(40,180,74,0.35)' : 'rgba(240,120,32,0.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {nextCita.servicio.toLowerCase().includes('entrena') ? <Dumbbell size={24} color={nextCita.estado === 'confirmada' ? '#28B44A' : '#F07820'} /> : <Sparkles size={24} color={nextCita.estado === 'confirmada' ? '#28B44A' : '#F07820'} />}
+                </motion.div>
                 <div>
-                  <p style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: nextCita.estado === 'confirmada' ? '#28B44A' : '#F07820', marginBottom: '4px' }}>
-                    {nextCita.estado === 'confirmada' ? '✓ Próxima cita confirmada' : 'Próxima cita — pendiente'}
+                  <p style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: nextCita.estado === 'confirmada' ? '#28B44A' : '#F07820', marginBottom: '6px' }}>
+                    {nextCita.estado === 'confirmada' ? 'Proxima cita confirmada' : 'Proxima cita -- pendiente'}
                   </p>
-                  <p style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#F0F0F0', marginBottom: '4px' }}>
+                  <p style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '22px', fontWeight: 700, color: '#F0F0F0', marginBottom: '6px' }}>
                     {nextCita.servicio}
                   </p>
-                  <p style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: 'rgba(240,240,240,0.55)' }}>
+                  <p style={{ fontFamily: 'var(--font-inter)', fontSize: '14px', color: 'rgba(240,240,240,0.55)' }}>
                     {nextCita.dia} · {nextCita.horario}
                   </p>
                 </div>
               </div>
-              <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: ESTADO[nextCita.estado].text, backgroundColor: ESTADO[nextCita.estado].bg, border: `1px solid ${ESTADO[nextCita.estado].border}`, padding: '7px 16px' }}>
+              <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: ESTADO[nextCita.estado].text, backgroundColor: ESTADO[nextCita.estado].bg, border: `1px solid ${ESTADO[nextCita.estado].border}`, padding: '8px 18px', fontWeight: 600 }}>
                 {ESTADO[nextCita.estado].label}
               </span>
             </motion.div>
@@ -355,7 +372,7 @@ export default function DashboardPage() {
         </AnimatePresence>
 
         {/* ── Stats ── */}
-        <div className="dash-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '32px' }}>
+        <div className="dash-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '40px' }}>
           {[
             { label: 'Total', value: reservas.length, icon: CalendarCheck, color: '#F07820', sub: 'citas registradas' },
             { label: 'Confirmadas', value: reservas.filter(r => r.estado === 'confirmada').length, icon: CheckCircle, color: '#28B44A', sub: 'listas para asistir' },
@@ -363,36 +380,40 @@ export default function DashboardPage() {
             { label: 'Canceladas', value: reservas.filter(r => r.estado === 'cancelada').length, icon: XCircle, color: '#FF6B6B', sub: 'no se realizaron' },
           ].map(({ label, value, icon: Icon, color, sub }, i) => (
             <motion.div key={label}
-              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: i * 0.07, ease: EXPO_OUT }}
-              style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '20px', position: 'relative', overflow: 'hidden', transition: 'border-color 0.3s ease, transform 0.3s ease' }}
-              onMouseEnter={(e) => { const el = e.currentTarget; el.style.borderColor = color; el.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={(e) => { const el = e.currentTarget; el.style.borderColor = '#1A2418'; el.style.transform = 'translateY(0)'; }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', backgroundColor: color, opacity: value > 0 ? 0.7 : 0.2 }} />
-              <Icon size={16} color={color} style={{ marginBottom: '10px', opacity: value > 0 ? 1 : 0.4 }} />
-              <div style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '32px', fontWeight: 700, color: value > 0 ? '#F0F0F0' : 'rgba(240,240,240,0.3)', lineHeight: 1, marginBottom: '4px' }}>{value}</div>
-              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: value > 0 ? color : 'rgba(240,240,240,0.25)', marginBottom: '4px', fontWeight: 600 }}>{label}</div>
-              <div className="stat-sub" style={{ fontFamily: 'var(--font-inter)', fontSize: '11px', color: 'rgba(240,240,240,0.3)', lineHeight: 1.4 }}>{sub}</div>
+              initial={{ opacity: 0, y: 18, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.55, delay: i * 0.08, ease: EXPO_OUT }}
+              style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '28px 24px', position: 'relative', overflow: 'hidden', transition: 'border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease', boxShadow: '0 4px 24px rgba(40,180,74,0.04)' }}
+              onMouseEnter={(e) => { const el = e.currentTarget; el.style.borderColor = color; el.style.transform = 'translateY(-3px)'; el.style.boxShadow = `0 8px 32px ${color}18`; }}
+              onMouseLeave={(e) => { const el = e.currentTarget; el.style.borderColor = '#1A2418'; el.style.transform = 'translateY(0)'; el.style.boxShadow = '0 4px 24px rgba(40,180,74,0.04)'; }}>
+              {/* Radial gradient background glow */}
+              <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: `radial-gradient(circle, ${color}12 0%, transparent 70%)`, pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', backgroundColor: color, opacity: value > 0 ? 0.8 : 0.2 }} />
+              <Icon size={20} color={color} style={{ marginBottom: '14px', opacity: value > 0 ? 1 : 0.4 }} />
+              <div style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '40px', fontWeight: 700, color: value > 0 ? '#F0F0F0' : 'rgba(240,240,240,0.3)', lineHeight: 1, marginBottom: '6px', letterSpacing: '-0.02em' }}>{value}</div>
+              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: value > 0 ? color : 'rgba(240,240,240,0.25)', marginBottom: '6px', fontWeight: 600 }}>{label}</div>
+              <div className="stat-sub" style={{ fontFamily: 'var(--font-inter)', fontSize: '11px', color: 'rgba(240,240,240,0.3)', lineHeight: 1.5 }}>{sub}</div>
             </motion.div>
           ))}
         </div>
 
-        {/* ── Tabs + botón ── */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-          <div className="dash-tabs-bar" style={{ display: 'flex', gap: '0' }}>
-            {([['proximas', 'Mis citas'], ['calendario', 'Calendario'], ['historial', 'Canceladas'], ['perfil', 'Mi perfil']] as [Tab, string][]).map(([t, label], i) => (
+        {/* ── Tabs + boton ── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
+          <div className="dash-tabs-bar" style={{ display: 'flex', gap: '6px', padding: '4px', backgroundColor: 'rgba(15,18,8,0.8)', border: '1px solid #1A2418', borderRadius: '8px' }}>
+            {([['proximas', 'Mis citas'], ['calendario', 'Calendario'], ['historial', 'Canceladas'], ['perfil', 'Mi perfil']] as [Tab, string][]).map(([t, label]) => (
               <button key={t} onClick={() => setTab(t)}
                 style={{
                   padding: '10px 20px',
-                  border: `1px solid ${tab === t ? '#F07820' : '#1A2418'}`,
-                  marginLeft: i > 0 ? '-1px' : 0,
-                  position: 'relative',
-                  zIndex: tab === t ? 1 : 0,
-                  backgroundColor: tab === t ? 'rgba(240,120,32,0.1)' : 'transparent',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: tab === t ? 'rgba(240,120,32,0.15)' : 'transparent',
                   color: tab === t ? '#F07820' : 'rgba(240,240,240,0.4)',
                   fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase',
-                  cursor: 'pointer', transition: 'all 0.2s ease', whiteSpace: 'nowrap',
-                }}>
+                  cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', whiteSpace: 'nowrap',
+                  fontWeight: tab === t ? 600 : 400,
+                  boxShadow: tab === t ? '0 2px 8px rgba(240,120,32,0.15)' : 'none',
+                }}
+                onMouseEnter={(e) => { if (tab !== t) e.currentTarget.style.backgroundColor = 'rgba(240,240,240,0.04)'; }}
+                onMouseLeave={(e) => { if (tab !== t) e.currentTarget.style.backgroundColor = 'transparent'; }}>
                 {label}
               </button>
             ))}
@@ -421,28 +442,40 @@ export default function DashboardPage() {
           {(tab === 'proximas' || tab === 'historial') && (
             <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
               {(tab === 'proximas' ? proximas : historial).length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '72px 24px', border: '1px solid #1A2418', backgroundColor: '#090C08', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 50% 50% at 50% 80%, rgba(240,120,32,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
-                  <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(240,120,32,0.07)', border: '1px solid rgba(240,120,32,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                    <CalendarCheck size={28} color="rgba(240,120,32,0.4)" />
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '20px', fontWeight: 700, color: '#F0F0F0', marginBottom: '8px' }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: EXPO_OUT }}
+                  style={{ textAlign: 'center', padding: '80px 32px', border: '1px solid #1A2418', backgroundColor: '#090C08', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 24px rgba(40,180,74,0.04)' }}>
+                  <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 50% 50% at 50% 80%, rgba(240,120,32,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.1, ease: EXPO_OUT }}
+                    style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, rgba(240,120,32,0.12) 0%, rgba(240,120,32,0.04) 100%)', border: '1px solid rgba(240,120,32,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                    <CalendarCheck size={32} color="rgba(240,120,32,0.45)" />
+                  </motion.div>
+                  <p style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontSize: '22px', fontWeight: 700, color: '#F0F0F0', marginBottom: '12px' }}>
                     {tab === 'proximas' ? 'Sin citas activas' : 'Sin cancelaciones'}
                   </p>
-                  <p style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: 'rgba(240,240,240,0.35)', marginBottom: '28px', maxWidth: '320px', margin: '0 auto 28px', lineHeight: 1.7 }}>
+                  <p style={{ fontFamily: 'var(--font-inter)', fontSize: '14px', color: 'rgba(240,240,240,0.35)', marginBottom: '32px', maxWidth: '340px', margin: '0 auto 32px', lineHeight: 1.7 }}>
                     {tab === 'proximas'
-                      ? 'Aún no tienes citas agendadas. Da el primer paso hacia tu transformación.'
-                      : 'No tienes citas canceladas. ¡Excelente constancia!'}
+                      ? 'Aun no tienes citas agendadas. Da el primer paso hacia tu transformacion.'
+                      : 'No tienes citas canceladas. Excelente constancia!'}
                   </p>
                   {tab === 'proximas' && (
-                    <button onClick={() => window.dispatchEvent(new CustomEvent('open-reservar'))}
-                      style={{ padding: '13px 32px', backgroundColor: '#F07820', border: 'none', color: '#F0F0F0', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 600, transition: 'background-color 0.3s ease' }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#FF8C35')}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#F07820')}>
-                      Agendar mi primera cita →
-                    </button>
+                    <motion.button
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.3, ease: EXPO_OUT }}
+                      onClick={() => window.dispatchEvent(new CustomEvent('open-reservar'))}
+                      style={{ padding: '14px 36px', backgroundColor: '#F07820', border: 'none', color: '#F0F0F0', fontFamily: 'var(--font-inter)', fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 600, transition: 'background-color 0.3s ease, transform 0.2s ease', borderRadius: '4px' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FF8C35'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F07820'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+                      Agendar mi primera cita
+                    </motion.button>
                   )}
-                </div>
+                </motion.div>
               ) : tab === 'historial' ? (
                 // Historial de canceladas
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -468,15 +501,17 @@ export default function DashboardPage() {
                     const est = ESTADO[r.estado];
                     return (
                       <motion.div key={r.id}
-                        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: i * 0.06, ease: EXPO_OUT }}
-                        style={{ position: 'relative', overflow: 'hidden', backgroundColor: '#090C08', border: `1px solid ${cleanMode ? 'rgba(245,180,50,0.25)' : '#1A2418'}`, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
-                        <div style={{ position: 'absolute', top: 0, left: 0, width: '3px', height: '100%', backgroundColor: est.bar, opacity: 0.6 }} />
-                        <div style={{ display: 'flex', gap: '28px', flexWrap: 'wrap', flex: 1, paddingLeft: '8px' }}>
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.45, delay: i * 0.07, ease: EXPO_OUT }}
+                        style={{ position: 'relative', overflow: 'hidden', backgroundColor: '#090C08', border: `1px solid ${cleanMode ? 'rgba(245,180,50,0.25)' : '#1A2418'}`, padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', transition: 'border-color 0.3s ease, transform 0.3s ease', boxShadow: '0 2px 16px rgba(0,0,0,0.1)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: est.bar, opacity: 0.6 }} />
+                        <div className="dash-cita-fields" style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', flex: 1, paddingLeft: '10px' }}>
                           {[['Servicio', r.servicio, true], ['Dia', r.dia, false], ['Horario', r.horario, false]].map(([label, val, bold]) => (
                             <div key={String(label)}>
-                              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '4px' }}>{label}</div>
-                              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: '#F0F0F0', fontWeight: bold ? 500 : 400 }}>{val}</div>
+                              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '6px' }}>{label}</div>
+                              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '14px', color: '#F0F0F0', fontWeight: bold ? 600 : 400 }}>{val}</div>
                             </div>
                           ))}
                         </div>
@@ -523,27 +558,27 @@ export default function DashboardPage() {
                           const est = ESTADO[r.estado];
                           return (
                             <motion.div key={r.id}
-                              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.4, delay: i * 0.06, ease: EXPO_OUT }}
-                              style={{ position: 'relative', overflow: 'hidden', backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px', transition: 'border-color 0.3s ease' }}
-                              onMouseEnter={(e) => (e.currentTarget.style.borderColor = est.bar + '55')}
-                              onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#1A2418')}>
-                              <div style={{ position: 'absolute', top: 0, left: 0, width: '3px', height: '100%', backgroundColor: est.bar, opacity: 0.6 }} />
-                              <div style={{ display: 'flex', gap: '28px', flexWrap: 'wrap', flex: 1, paddingLeft: '8px' }}>
+                              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.45, delay: i * 0.07, ease: EXPO_OUT }}
+                              style={{ position: 'relative', overflow: 'hidden', backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', transition: 'border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease', boxShadow: '0 2px 16px rgba(40,180,74,0.03)' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.borderColor = est.bar + '55'; e.currentTarget.style.boxShadow = `0 4px 24px ${est.bar}12`; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1A2418'; e.currentTarget.style.boxShadow = '0 2px 16px rgba(40,180,74,0.03)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+                              <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: est.bar, opacity: 0.7 }} />
+                              <div className="dash-cita-fields" style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', flex: 1, paddingLeft: '10px' }}>
                                 {[
                                   ['Servicio', r.servicio, true],
-                                  ['Día', r.dia, false],
+                                  ['Dia', r.dia, false],
                                   ['Horario', r.horario, false],
                                   ['Objetivo', r.objetivo, false],
                                 ].map(([label, val, bold]) => (
                                   <div key={String(label)}>
-                                    <div style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '4px' }}>{label}</div>
-                                    <div style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: '#F0F0F0', fontWeight: bold ? 500 : 400 }}>{val}</div>
+                                    <div style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '6px' }}>{label}</div>
+                                    <div style={{ fontFamily: 'var(--font-inter)', fontSize: '14px', color: '#F0F0F0', fontWeight: bold ? 600 : 400, lineHeight: 1.4 }}>{val}</div>
                                   </div>
                                 ))}
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: est.text, backgroundColor: est.bg, border: `1px solid ${est.border}`, padding: '5px 12px', whiteSpace: 'nowrap' }}>
+                                <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: est.text, backgroundColor: est.bg, border: `1px solid ${est.border}`, padding: '6px 14px', whiteSpace: 'nowrap', fontWeight: 600, borderRadius: '4px' }}>
                                   {est.label}
                                 </span>
                                 {(r.estado === 'pendiente' || r.estado === 'confirmada') && (
@@ -647,10 +682,10 @@ export default function DashboardPage() {
           {/* Perfil */}
           {tab === 'perfil' && (
             <motion.div key="perfil" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-              <div className="dash-profile-card" style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', maxWidth: '580px', overflow: 'hidden' }}>
+              <div className="dash-profile-card" style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', maxWidth: '620px', overflow: 'hidden', boxShadow: '0 4px 32px rgba(40,180,74,0.05)' }}>
 
                 {/* Profile hero */}
-                <div style={{ background: 'linear-gradient(135deg, rgba(240,120,32,0.12) 0%, rgba(40,180,74,0.06) 100%)', borderBottom: '1px solid #1A2418', padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ background: 'linear-gradient(135deg, rgba(240,120,32,0.12) 0%, rgba(40,180,74,0.06) 100%)', borderBottom: '1px solid #1A2418', padding: '32px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
                     <label htmlFor="avatar-upload" style={{ position: 'relative', width: '72px', height: '72px', flexShrink: 0, cursor: 'pointer' }}
                       title="Cambiar foto de perfil">
@@ -705,7 +740,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Fields */}
-                <div style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ padding: '32px 36px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   {/* Nombre + Apellido */}
                   <div>
                     <p style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '12px' }}>Información personal</p>
@@ -782,6 +817,10 @@ export default function DashboardPage() {
         @keyframes spin { to { transform: rotate(360deg); } }
         label[for="avatar-upload"]:hover .avatar-overlay { opacity: 1 !important; }
         label[for="avatar-upload"]:hover .avatar-ring { border-color: #F07820 !important; }
+        @media (max-width: 768px) {
+          .dash-stats { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+          .dash-cita-fields { gap: 18px !important; }
+        }
         @media (max-width: 640px) {
           .dash-stats { grid-template-columns: repeat(2, 1fr) !important; }
           .stat-sub { display: none; }
@@ -789,11 +828,12 @@ export default function DashboardPage() {
         @media (max-width: 480px) {
           .dash-username { display: none; }
           .dash-back-label { display: none; }
-          .dash-tabs-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+          .dash-tabs-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 3px !important; border-radius: 6px !important; }
           .dash-tabs-bar::-webkit-scrollbar { display: none; }
-          .dash-tabs-bar button { white-space: nowrap; font-size: 10px !important; padding: 9px 14px !important; }
+          .dash-tabs-bar button { white-space: nowrap; font-size: 10px !important; padding: 8px 12px !important; border-radius: 4px !important; }
           .dash-profile-card { max-width: 100% !important; }
           .dash-name-grid { grid-template-columns: 1fr !important; }
+          .dash-cita-fields { gap: 14px !important; flex-direction: column; }
         }
       `}</style>
     </div>

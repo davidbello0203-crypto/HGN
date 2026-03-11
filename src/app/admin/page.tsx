@@ -340,8 +340,17 @@ export default function AdminPage() {
   };
 
   if (loading) return (
-    <div style={{ minHeight: '100dvh', backgroundColor: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: '32px', height: '32px', border: '2px solid #1A2418', borderTopColor: '#F07820', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+    <div style={{ minHeight: '100dvh', backgroundColor: '#080808', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: EXPO_OUT }}
+        style={{ width: '44px', height: '44px', border: '2px solid #1A2418', borderTopColor: '#F07820', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <motion.p
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15, ease: EXPO_OUT }}
+        style={{ fontFamily: 'var(--font-inter)', fontSize: '12px', letterSpacing: '0.15em', color: 'rgba(240,240,240,0.3)', textTransform: 'uppercase' }}>Panel de administracion</motion.p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
@@ -349,8 +358,8 @@ export default function AdminPage() {
   return (
     <div style={{ minHeight: '100dvh', backgroundColor: '#080808' }}>
       {/* Navbar */}
-      <header style={{ borderBottom: '1px solid #1A2418', backgroundColor: 'rgba(8,8,8,0.97)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 50 }}>
-        <div className="container-gnh" style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <header style={{ borderBottom: '1px solid #1A2418', backgroundColor: 'rgba(8,8,8,0.95)', backdropFilter: 'blur(20px)', position: 'sticky', top: 0, zIndex: 50 }}>
+        <div className="container-gnh" style={{ height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Link href="/"><Image src="/emblema-gnh.svg" alt="GNH" width={100} height={40} style={{ objectFit: 'contain', height: '36px', width: 'auto' }} /></Link>
             <span style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#F07820', border: '1px solid rgba(240,120,32,0.3)', padding: '3px 8px' }}>Admin</span>
@@ -372,37 +381,44 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <div className="container-gnh" style={{ paddingTop: '40px', paddingBottom: '80px' }}>
+      <div className="container-gnh" style={{ paddingTop: '44px', paddingBottom: '100px' }}>
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EXPO_OUT }} style={{ marginBottom: '32px' }}>
-          <p className="eyebrow" style={{ marginBottom: '8px', display: 'block' }}>Panel de control</p>
-          <h1 style={{ fontFamily: 'var(--font-playfair)', fontSize: '30px', fontWeight: 700, color: '#F0F0F0' }}>Administracion GNH</h1>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EXPO_OUT }} style={{ marginBottom: '40px' }}>
+          <p className="eyebrow" style={{ marginBottom: '10px', display: 'block', fontSize: '11px' }}>Panel de control</p>
+          <h1 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(26px, 5vw, 36px)', fontWeight: 700, color: '#F0F0F0' }}>Administracion GNH</h1>
         </motion.div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '32px' }} className="admin-stats">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '40px' }} className="admin-stats">
           {[
             { label: 'Total citas', value: stats.total, icon: CalendarCheck, color: '#F07820' },
             { label: 'Clientes', value: stats.clientes, icon: Users, color: '#F07820' },
             { label: 'Pendientes', value: stats.pendientes, icon: Clock, color: '#F07820' },
             { label: 'Confirmadas', value: stats.confirmadas, icon: CheckCircle, color: '#28B44A' },
           ].map(({ label, value, icon: Icon, color }, i) => (
-            <motion.div key={label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: i * 0.07, ease: EXPO_OUT }}
-              style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '20px 22px' }}>
-              <Icon size={17} color={color} style={{ marginBottom: '10px' }} />
-              <div style={{ fontFamily: 'var(--font-playfair)', fontSize: '30px', fontWeight: 700, color: '#F0F0F0', lineHeight: 1 }}>{value}</div>
-              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.35)', marginTop: '4px' }}>{label}</div>
+            <motion.div key={label} initial={{ opacity: 0, y: 18, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.55, delay: i * 0.08, ease: EXPO_OUT }}
+              style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '28px 26px', position: 'relative', overflow: 'hidden', transition: 'border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease', boxShadow: '0 4px 24px rgba(40,180,74,0.04)' }}
+              onMouseEnter={(e) => { const el = e.currentTarget; el.style.borderColor = color; el.style.transform = 'translateY(-3px)'; el.style.boxShadow = `0 8px 32px ${color}18`; }}
+              onMouseLeave={(e) => { const el = e.currentTarget; el.style.borderColor = '#1A2418'; el.style.transform = 'translateY(0)'; el.style.boxShadow = '0 4px 24px rgba(40,180,74,0.04)'; }}>
+              {/* Radial gradient background glow */}
+              <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: `radial-gradient(circle, ${color}12 0%, transparent 70%)`, pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', backgroundColor: color, opacity: value > 0 ? 0.8 : 0.2 }} />
+              <Icon size={20} color={color} style={{ marginBottom: '14px', opacity: value > 0 ? 1 : 0.4 }} />
+              <div style={{ fontFamily: 'var(--font-playfair)', fontSize: '40px', fontWeight: 700, color: '#F0F0F0', lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</div>
+              <div style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.35)', marginTop: '6px' }}>{label}</div>
             </motion.div>
           ))}
         </div>
 
         {/* Tabs */}
-        <div className="admin-toolbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-          <div className="admin-tabs-bar" style={{ display: 'flex', gap: '4px' }}>
+        <div className="admin-toolbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '14px' }}>
+          <div className="admin-tabs-bar" style={{ display: 'flex', gap: '6px', padding: '4px', backgroundColor: 'rgba(15,18,8,0.8)', border: '1px solid #1A2418', borderRadius: '8px' }}>
             {([['citas', 'Citas', CalendarCheck], ['calendario', 'Calendario', CalendarDays], ['clientes', 'Clientes', Users], ['estadisticas', 'Estadisticas', TrendingUp]] as [Tab, string, React.ElementType][]).map(([t, label, Icon]) => (
               <button key={t} onClick={() => setTab(t)}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', border: `1px solid ${tab === t ? '#F07820' : '#1A2418'}`, backgroundColor: tab === t ? 'rgba(240,120,32,0.1)' : 'transparent', color: tab === t ? '#F07820' : 'rgba(240,240,240,0.45)', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.2s ease' }}>
-                <Icon size={12} /> {label}
+                style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '10px 18px', border: 'none', borderRadius: '6px', backgroundColor: tab === t ? 'rgba(240,120,32,0.15)' : 'transparent', color: tab === t ? '#F07820' : 'rgba(240,240,240,0.45)', fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', fontWeight: tab === t ? 600 : 400, boxShadow: tab === t ? '0 2px 8px rgba(240,120,32,0.15)' : 'none' }}
+                onMouseEnter={(e) => { if (tab !== t) e.currentTarget.style.backgroundColor = 'rgba(240,240,240,0.04)'; }}
+                onMouseLeave={(e) => { if (tab !== t) e.currentTarget.style.backgroundColor = 'transparent'; }}>
+                <Icon size={13} /> {label}
               </button>
             ))}
           </div>
@@ -464,34 +480,39 @@ export default function AdminPage() {
             <motion.div key="citas" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
 
               {/* Segmento por tipo */}
-              <div style={{ display: 'flex', gap: '0', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '18px', padding: '3px', backgroundColor: 'rgba(15,18,8,0.6)', border: '1px solid #1A2418', borderRadius: '8px', width: 'fit-content' }}>
                 {([
                   ['todas',          'Todos',          stats.total],
                   ['nutricion',      'Nutricion',      stats.nutricion],
                   ['entrenamiento',  'Entrenamiento',  stats.entrenamiento],
-                ] as [FilterTipo, string, number][]).map(([t, label, count], i) => (
+                ] as [FilterTipo, string, number][]).map(([t, label, count]) => (
                   <button key={t} onClick={() => setTipoFilter(t)}
                     style={{
-                      padding: '10px 20px',
-                      border: `1px solid ${tipoFilter === t ? '#28B44A' : '#1A2418'}`,
-                      marginLeft: i > 0 ? '-1px' : 0,
-                      position: 'relative', zIndex: tipoFilter === t ? 1 : 0,
-                      backgroundColor: tipoFilter === t ? 'rgba(40,180,74,0.1)' : '#090C08',
+                      padding: '9px 18px',
+                      border: 'none',
+                      borderRadius: '6px',
+                      backgroundColor: tipoFilter === t ? 'rgba(40,180,74,0.15)' : 'transparent',
                       color: tipoFilter === t ? '#28B44A' : 'rgba(240,240,240,0.45)',
                       fontFamily: 'var(--font-inter)', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
-                      cursor: 'pointer', transition: 'all 0.2s ease', whiteSpace: 'nowrap',
-                    }}>
+                      cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)', whiteSpace: 'nowrap',
+                      fontWeight: tipoFilter === t ? 600 : 400,
+                      boxShadow: tipoFilter === t ? '0 2px 8px rgba(40,180,74,0.12)' : 'none',
+                    }}
+                    onMouseEnter={(e) => { if (tipoFilter !== t) e.currentTarget.style.backgroundColor = 'rgba(240,240,240,0.04)'; }}
+                    onMouseLeave={(e) => { if (tipoFilter !== t) e.currentTarget.style.backgroundColor = 'transparent'; }}>
                     {label} <span style={{ marginLeft: '6px', fontSize: '10px', opacity: 0.7 }}>({count})</span>
                   </button>
                 ))}
               </div>
 
               {/* Filtros estado */}
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <Filter size={13} color="rgba(240,240,240,0.3)" style={{ alignSelf: 'center', marginRight: '4px' }} />
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px', alignItems: 'center' }}>
+                <Filter size={13} color="rgba(240,240,240,0.3)" style={{ marginRight: '2px' }} />
                 {(['todas', 'pendiente', 'confirmada', 'cancelada'] as FilterEstado[]).map((f) => (
                   <button key={f} onClick={() => setFilter(f)}
-                    style={{ padding: '6px 14px', border: `1px solid ${filter === f ? '#F07820' : '#1A2418'}`, backgroundColor: filter === f ? 'rgba(240,120,32,0.1)' : 'transparent', color: filter === f ? '#F07820' : 'rgba(240,240,240,0.4)', fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'capitalize', cursor: 'pointer', transition: 'all 0.2s ease' }}>
+                    style={{ padding: '7px 16px', border: `1px solid ${filter === f ? '#F07820' : '#1A2418'}`, borderRadius: '20px', backgroundColor: filter === f ? 'rgba(240,120,32,0.12)' : 'transparent', color: filter === f ? '#F07820' : 'rgba(240,240,240,0.4)', fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'capitalize', cursor: 'pointer', transition: 'all 0.25s ease', fontWeight: filter === f ? 600 : 400 }}
+                    onMouseEnter={(e) => { if (filter !== f) e.currentTarget.style.borderColor = 'rgba(240,120,32,0.3)'; }}
+                    onMouseLeave={(e) => { if (filter !== f) e.currentTarget.style.borderColor = '#1A2418'; }}>
                     {f} {f !== 'todas' && `(${reservas.filter(r => r.estado === f).length})`}
                   </button>
                 ))}
@@ -499,19 +520,25 @@ export default function AdminPage() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {filtered.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '48px', border: '1px solid #1A2418', color: 'rgba(240,240,240,0.3)', fontFamily: 'var(--font-inter)', fontSize: '14px' }}>
-                    No hay citas en esta categoria
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: EXPO_OUT }}
+                    style={{ textAlign: 'center', padding: '64px 32px', border: '1px solid #1A2418', color: 'rgba(240,240,240,0.3)', fontFamily: 'var(--font-inter)', fontSize: '14px', backgroundColor: '#090C08', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 50% 50% at 50% 80%, rgba(240,120,32,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                    <CalendarCheck size={32} color="rgba(240,120,32,0.3)" style={{ marginBottom: '16px' }} />
+                    <p>No hay citas en esta categoria</p>
+                  </motion.div>
                 ) : filtered.map((r, i) => {
                   const estado = ESTADO_COLORS[r.estado];
                   const isUpdating = updating === r.id;
                   const isGuest = !!r.guest_name;
                   return (
-                    <motion.div key={r.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: i * 0.04, ease: EXPO_OUT }}
+                    <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.05, ease: EXPO_OUT }}
                       onClick={() => { if (!cleanMode) { setDetailReserva(r); setDetailNoteText(r.notas_admin || ''); setDetailEditingNote(false); } }}
-                      style={{ backgroundColor: '#090C08', border: `1px solid ${cleanMode && r.estado === 'cancelada' ? 'rgba(245,180,50,0.3)' : '#1A2418'}`, padding: '20px 24px', cursor: cleanMode ? 'default' : 'pointer', transition: 'border-color 0.2s ease' }}
-                      onMouseEnter={(e) => { if (!cleanMode) e.currentTarget.style.borderColor = 'rgba(240,120,32,0.35)'; }}
-                      onMouseLeave={(e) => { if (!cleanMode) e.currentTarget.style.borderColor = '#1A2418'; }}>
+                      style={{ backgroundColor: '#090C08', border: `1px solid ${cleanMode && r.estado === 'cancelada' ? 'rgba(245,180,50,0.3)' : '#1A2418'}`, padding: '24px 28px', cursor: cleanMode ? 'default' : 'pointer', transition: 'border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease', boxShadow: '0 2px 16px rgba(40,180,74,0.03)' }}
+                      onMouseEnter={(e) => { if (!cleanMode) { e.currentTarget.style.borderColor = 'rgba(240,120,32,0.35)'; e.currentTarget.style.boxShadow = '0 4px 24px rgba(240,120,32,0.08)'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = cleanMode && r.estado === 'cancelada' ? 'rgba(245,180,50,0.3)' : '#1A2418'; e.currentTarget.style.boxShadow = '0 2px 16px rgba(40,180,74,0.03)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
                         {/* Info cliente */}
                         <div style={{ flex: 1, minWidth: '200px' }}>
@@ -547,11 +574,11 @@ export default function AdminPage() {
                               {(r.tipo ?? 'nutricion') === 'entrenamiento' ? 'Entrenamiento' : 'Nutricion'}
                             </span>
                           </div>
-                          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                          <div className="admin-cita-fields" style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginBottom: '14px' }}>
                             {[['Servicio', r.servicio], ['Dia', r.dia], ['Horario', r.horario], ['Objetivo', r.objetivo]].map(([label, val]) => (
                               <div key={label}>
-                                <div style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '2px' }}>{label}</div>
-                                <div style={{ fontFamily: 'var(--font-inter)', fontSize: '13px', color: '#F0F0F0' }}>{val}</div>
+                                <div style={{ fontFamily: 'var(--font-inter)', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.3)', marginBottom: '4px' }}>{label}</div>
+                                <div style={{ fontFamily: 'var(--font-inter)', fontSize: '14px', color: '#F0F0F0', lineHeight: 1.4 }}>{val}</div>
                               </div>
                             ))}
                           </div>
@@ -590,7 +617,7 @@ export default function AdminPage() {
 
                         {/* Acciones */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                          <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: estado.text, backgroundColor: estado.bg, border: `1px solid ${estado.border}`, padding: '4px 10px' }}>
+                          <span style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: estado.text, backgroundColor: estado.bg, border: `1px solid ${estado.border}`, padding: '6px 14px', fontWeight: 600, borderRadius: '4px' }}>
                             {r.estado}
                           </span>
 
@@ -700,7 +727,7 @@ export default function AdminPage() {
                     style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: 'rgba(240,240,240,0.45)', fontFamily: 'var(--font-inter)', fontSize: '12px', cursor: 'pointer', marginBottom: '20px', padding: 0 }}>
                     ← Volver a clientes
                   </button>
-                  <div style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '24px', marginBottom: '16px' }}>
+                  <div style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '28px 30px', marginBottom: '20px', boxShadow: '0 4px 24px rgba(40,180,74,0.04)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
                       <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(240,120,32,0.12)', border: '1px solid rgba(240,120,32,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-playfair)', fontSize: '20px', fontWeight: 700, color: '#F07820' }}>
                         {selectedCliente.nombre?.[0]?.toUpperCase()}
@@ -741,11 +768,11 @@ export default function AdminPage() {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {clientesFiltrados.map((c, i) => (
-                    <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: i * 0.04 }}
+                    <motion.div key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.05, ease: EXPO_OUT }}
                       onClick={() => setSelectedCliente(c)}
-                      style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', transition: 'border-color 0.2s ease' }}
-                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(240,120,32,0.3)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#1A2418')}>
+                      style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', transition: 'border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease', boxShadow: '0 2px 16px rgba(40,180,74,0.03)' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(240,120,32,0.3)'; e.currentTarget.style.boxShadow = '0 4px 24px rgba(240,120,32,0.06)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1A2418'; e.currentTarget.style.boxShadow = '0 2px 16px rgba(40,180,74,0.03)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'rgba(240,120,32,0.12)', border: '1px solid rgba(240,120,32,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '13px', fontWeight: 600, color: '#F07820', flexShrink: 0, overflow: 'hidden' }}>
                           {(c as Cliente & { avatar_url?: string }).avatar_url
@@ -845,7 +872,7 @@ export default function AdminPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }} className="charts-grid">
 
                 {/* Por servicio */}
-                <div style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '24px' }}>
+                <div style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '28px', boxShadow: '0 4px 24px rgba(40,180,74,0.04)' }}>
                   <p style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.4)', marginBottom: '20px' }}>Citas por servicio</p>
                   {chartData.length === 0 ? (
                     <p style={{ color: 'rgba(240,240,240,0.25)', fontFamily: 'var(--font-inter)', fontSize: '13px', textAlign: 'center', padding: '32px 0' }}>Sin datos aun</p>
@@ -862,7 +889,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Por estado */}
-                <div style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '24px' }}>
+                <div style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '28px', boxShadow: '0 4px 24px rgba(40,180,74,0.04)' }}>
                   <p style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.4)', marginBottom: '20px' }}>Estado de citas</p>
                   {reservas.length === 0 ? (
                     <p style={{ color: 'rgba(240,240,240,0.25)', fontFamily: 'var(--font-inter)', fontSize: '13px', textAlign: 'center', padding: '32px 0' }}>Sin datos aun</p>
@@ -881,7 +908,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Objetivos mas frecuentes */}
-                <div style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '24px', gridColumn: '1 / -1' }}>
+                <div style={{ backgroundColor: '#090C08', border: '1px solid #1A2418', padding: '28px', gridColumn: '1 / -1', boxShadow: '0 4px 24px rgba(40,180,74,0.04)' }}>
                   <p style={{ fontFamily: 'var(--font-inter)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(240,240,240,0.4)', marginBottom: '20px' }}>Objetivos de los clientes</p>
                   {reservas.length === 0 ? (
                     <p style={{ color: 'rgba(240,240,240,0.25)', fontFamily: 'var(--font-inter)', fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>Sin datos aun</p>
@@ -937,7 +964,7 @@ export default function AdminPage() {
                   }}>
 
                   {/* Header del modal */}
-                  <div style={{ padding: '24px 28px 20px', borderBottom: '1px solid #1A2418', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', background: 'linear-gradient(135deg, rgba(240,120,32,0.07) 0%, transparent 60%)' }}>
+                  <div style={{ padding: '28px 32px 24px', borderBottom: '1px solid #1A2418', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', background: 'linear-gradient(135deg, rgba(240,120,32,0.08) 0%, transparent 60%)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                       <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: isGuest ? 'rgba(245,180,50,0.12)' : 'rgba(240,120,32,0.12)', border: `1px solid ${isGuest ? 'rgba(245,180,50,0.3)' : 'rgba(240,120,32,0.3)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-inter)', fontSize: '18px', fontWeight: 700, color: isGuest ? '#F5B432' : '#F07820', flexShrink: 0, overflow: 'hidden' }}>
                         {!isGuest && r.profiles?.avatar_url
@@ -966,7 +993,7 @@ export default function AdminPage() {
                     </button>
                   </div>
 
-                  <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: '22px' }}>
 
                     {/* Estado + tipo */}
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1339,18 +1366,20 @@ export default function AdminPage() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 768px) {
-          .admin-stats { grid-template-columns: repeat(2, 1fr) !important; }
+          .admin-stats { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
           .charts-grid { grid-template-columns: 1fr !important; }
+          .admin-cita-fields { gap: 16px !important; }
         }
         @media (max-width: 600px) {
           .admin-csv-label { display: none; }
           .admin-toolbar { flex-direction: column; align-items: stretch !important; }
-          .admin-tabs-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+          .admin-tabs-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 3px !important; border-radius: 6px !important; }
           .admin-tabs-bar::-webkit-scrollbar { display: none; }
-          .admin-tabs-bar button { white-space: nowrap; }
+          .admin-tabs-bar button { white-space: nowrap; font-size: 10px !important; padding: 8px 12px !important; border-radius: 4px !important; }
           .admin-search-wrap { width: 100%; }
           .admin-search-wrap input { width: 100% !important; }
           .admin-obj-label { min-width: 0; flex: 1; font-size: 12px !important; }
+          .admin-cita-fields { gap: 12px !important; flex-direction: column; }
         }
       `}</style>
     </div>
