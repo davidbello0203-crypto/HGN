@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'bryangil0203@gmail.com';
+async function getAdminRole(userId: string) {
+  const admin = await createAdminClient();
+  const { data } = await admin.from('profiles').select('role').eq('id', userId).single();
+  return data?.role ?? 'user';
+}
 
+// PATCH — archivar cita (admin o dueño de la cita, solo canceladas)
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -10,23 +15,18 @@ export async function PATCH(
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-    }
+    if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
 
     const { id } = await params;
-    const body = await req.json();
-    const { archived } = body;
-
+    const { archived } = await req.json();
     if (typeof archived !== 'boolean') {
       return NextResponse.json({ error: 'Campo archived requerido (boolean)' }, { status: 400 });
     }
 
-    const isAdmin = user.email === ADMIN_EMAIL;
+    const role = await getAdminRole(user.id);
+    const adminClient = await createAdminClient();
 
-    // Fetch the reservation to verify ownership or admin access
-    const { data: reserva, error: fetchErr } = await supabase
+    const { data: reserva, error: fetchErr } = await adminClient
       .from('reservas')
       .select('id, user_id, estado')
       .eq('id', id)
@@ -36,51 +36,43 @@ export async function PATCH(
       return NextResponse.json({ error: 'Reserva no encontrada' }, { status: 404 });
     }
 
-    // Only allow archiving cancelled reservations
     if (reserva.estado !== 'cancelada') {
       return NextResponse.json({ error: 'Solo se pueden ocultar citas canceladas' }, { status: 400 });
     }
 
-    // Must be admin or owner
-    if (!isAdmin && reserva.user_id !== user.id) {
+    if (role !== 'admin' && reserva.user_id !== user.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 
-    const { error: updateErr } = await supabase
+    const { error: updateErr } = await adminClient
       .from('reservas')
       .update({ archived })
       .eq('id', id);
 
     if (updateErr) throw updateErr;
-
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error(err);
+    console.error('PATCH reserva error:', err);
     return NextResponse.json({ error: 'Error al actualizar la reserva' }, { status: 500 });
   }
 }
 
+// DELETE — eliminar permanentemente (solo admin)
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verify identity with regular client (reads session cookie)
-    const authClient = await createClient();
-    const { data: { user } } = await authClient.auth.getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
 
-    if (!user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
-    }
-
-    const isAdmin = user.email === ADMIN_EMAIL;
-    if (!isAdmin) {
+    const role = await getAdminRole(user.id);
+    if (role !== 'admin') {
       return NextResponse.json({ error: 'Solo el administrador puede eliminar citas' }, { status: 403 });
     }
 
     const { id } = await params;
-
-    // Use admin client to bypass RLS for the actual delete
     const adminClient = await createAdminClient();
     const { error } = await adminClient.from('reservas').delete().eq('id', id);
     if (error) throw error;
