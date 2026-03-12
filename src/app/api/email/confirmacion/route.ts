@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const { nombre, apellido, email } = reserva.profiles;
 
     await resend.emails.send({
-      from: 'GNH <noreply@goodnutritionhabits.com>',
+      from: process.env.EMAIL_FROM ?? 'GNH <onboarding@resend.dev>',
       to: email,
       subject: '✅ Tu cita ha sido confirmada — Good Nutrition Habits',
       html: `

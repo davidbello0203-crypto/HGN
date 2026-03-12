@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-
-const ADMIN_EMAIL = 'bryangil0203@gmail.com';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,8 +15,12 @@ export async function POST(req: NextRequest) {
 
     // Guest booking: only admin can create guest reservations
     const isGuest = !!guest_name;
-    if (isGuest && user.email !== ADMIN_EMAIL) {
-      return NextResponse.json({ error: 'Solo el admin puede crear citas de invitados' }, { status: 403 });
+    if (isGuest) {
+      const adminDb = await createAdminClient();
+      const { data: profile } = await adminDb.from('profiles').select('role').eq('id', user.id).single();
+      if (profile?.role !== 'admin') {
+        return NextResponse.json({ error: 'Solo el admin puede crear citas de invitados' }, { status: 403 });
+      }
     }
 
     if (!servicio || !dia || !horario) {
