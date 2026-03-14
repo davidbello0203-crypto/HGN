@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
-import { resend, FROM, emailClienteConfirmada } from '@/lib/email';
+import { resend, FROM, ADMIN_EMAIL, emailAdminCancelacion } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
   try {
     const { reservaId } = await req.json();
-    const supabase = createAdminClient();
+    if (!ADMIN_EMAIL) return NextResponse.json({ ok: true, skipped: 'no admin email' });
 
+    const supabase = createAdminClient();
     const { data: reserva, error } = await supabase
       .from('reservas')
       .select('*, profiles(nombre, apellido, email, telefono)')
@@ -17,36 +18,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Reserva no encontrada' }, { status: 404 });
     }
 
-    // Invitados no tienen email
-    if (reserva.guest_name) {
-      return NextResponse.json({ ok: true, skipped: 'guest' });
-    }
-
-    const { nombre, apellido, email } = reserva.profiles;
-    if (!email) return NextResponse.json({ error: 'Sin email' }, { status: 400 });
+    const nombre = reserva.guest_name
+      ? reserva.guest_name
+      : `${reserva.profiles?.nombre ?? ''} ${reserva.profiles?.apellido ?? ''}`.trim();
+    const email = reserva.guest_name ? '' : (reserva.profiles?.email ?? '');
+    const telefono = reserva.guest_name ? reserva.guest_phone : reserva.profiles?.telefono;
 
     const { error: sendError } = await resend.emails.send({
       from: FROM,
-      to: email,
-      subject: '✅ Tu cita está confirmada — Good Nutrition Habits',
-      html: emailClienteConfirmada({
-        nombre: `${nombre} ${apellido}`.trim(),
+      to: ADMIN_EMAIL,
+      subject: `Cita cancelada — ${nombre}`,
+      html: emailAdminCancelacion({
+        nombre,
+        email,
+        telefono,
         servicio: reserva.servicio,
         dia: reserva.dia,
         horario: reserva.horario,
-        objetivo: reserva.objetivo,
         fecha: reserva.fecha,
       }),
     });
 
     if (sendError) {
-      console.error('Resend error (confirmacion):', sendError);
-      return NextResponse.json({ error: 'Error enviando email' }, { status: 500 });
+      console.error('Resend error (cancelacion):', sendError);
     }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error('Email confirmacion exception:', err);
+    console.error('Email cancelacion exception:', err);
     return NextResponse.json({ error: 'Error enviando email' }, { status: 500 });
   }
 }

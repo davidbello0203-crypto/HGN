@@ -183,6 +183,12 @@ export default function DashboardPage() {
     setCancelingId(id);
     const supabase = createClient();
     await supabase.from('reservas').update({ estado: 'cancelada' }).eq('id', id);
+    // Notificar a Bryan
+    fetch('/api/email/cancelacion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reservaId: id }),
+    }).catch(console.error);
     await reload();
     setCancelingId(null);
   };
